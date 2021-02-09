@@ -1,0 +1,111 @@
+<resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
+    <string name="app_name">Sunshine</string>
+    <string name="search">Search</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_reset">Reset</string>
+    <string name="action_map">Map</string>
+    <string name="action_share">Share</string>
+
+
+
+    <string name="Error_message">
+        An error has occurred. Please try again by clicking REFRESH
+    </string>
+
+    <string name="today" />
+    <string name="tomorrow" />
+
+    <string name="format_full_friendly_date">
+          <xliff:g id="month">%1$s</xliff:g>, <xliff:g id="day">%2$s</xliff:g>
+    </string>
+    <!-- - - - - - - - - - - - - - - -->
+    <!-- Used by SunshineWeatherUtils-->
+    <!-- - - - - - - - - - - - - - - -->
+
+    <!-- Temperature format in Celsius [CHAR LIMIT=5] -->
+    <string name="format_temperature_celsius">
+       <xliff:g id="temp">%1.0f</xliff:g>\u00B0C
+   </string>
+
+    <!-- Temperature format in Fahrenheit [CHAR LIMIT=5] -->
+    <string name="format_temperature_fahrenheit">
+       <xliff:g id="temp">%1.0f</xliff:g>\u00B0F
+   </string>
+
+    <!-- Wind in kph [CHAR LIMIT=25] -->
+    <string name="format_wind_kmh">
+        <xliff:g id="speed">%1$1.0f</xliff:g> km/h <xliff:g id="direction">%2$s</xliff:g>
+    </string>
+
+    <!-- Wind in mph [CHAR LIMIT=25] -->
+    <string name="format_wind_mph">
+        <xliff:g id="speed">%1$1.0f</xliff:g> mph <xliff:g id="direction">%2$s</xliff:g>
+
+    </string>
+
+    <string name="condition_500" />
+    <string name="condition_501" />
+    <string name="condition_502" />
+    <string name="condition_503" />
+    <string name="condition_504" />
+    <string name="condition_511" />
+    <string name="condition_520" />
+    <string name="condition_531" />
+    <string name="condition_600" />
+    <string name="condition_601" />
+    <string name="condition_602" />
+    <string name="condition_611" />
+    <string name="condition_612" />
+    <string name="condition_615" />
+    <string name="condition_616" />
+    <string name="condition_620" />
+    <string name="condition_621" />
+    <string name="condition_622" />
+    <string name="condition_701" />
+    <string name="condition_711" />
+    <string name="condition_721" />
+    <string name="condition_731" />
+    <string name="condition_741" />
+    <string name="condition_751" />
+    <string name="condition_761" />
+    <string name="condition_762" />
+    <string name="condition_771" />
+    <string name="condition_781" />
+    <string name="condition_800" />
+    <string name="condition_801" />
+    <string name="condition_802" />
+    <string name="condition_803" />
+    <string name="condition_804" />
+    <string name="condition_900" />
+    <string name="condition_901" />
+    <string name="condition_902" />
+    <string name="condition_903" />
+    <string name="condition_904" />
+    <string name="condition_905" />
+    <string name="condition_906" />
+    <string name="condition_951" />
+    <string name="condition_952" />
+    <string name="condition_953" />
+    <string name="condition_954" />
+    <string name="condition_955" />
+    <string name="condition_956" />
+    <string name="condition_957" />
+    <string name="condition_958" />
+    <string name="condition_959" />
+    <string name="condition_960" />
+    <string name="condition_961" />
+    <string name="condition_962" />
+    <string name="condition_3xx" />
+    <string name="condition_2xx" />
+    <string name="condition_unknown">Unknown (<xliff:g id="conditionId">%1$d</xliff:g>)</string>
+    <string name="title_activity_child">ChildActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+
+</resources>
