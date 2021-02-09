@@ -1,28 +1,32 @@
 package com.example.sunshine
 
+import android.os.Parcel
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.example.android.sunshine.R
 
 
 /**
  * [ForecastAdapter] exposes a list of weather forecasts to a
- * [android.support.v7.widget.RecyclerView]
+
  */
+@Suppress("UNREACHABLE_CODE")
 class ForecastAdapter
 /**
  * Creates a ForecastAdapter.
  *
- * @param clickHandler The on-click handler for this adapter. This single handler is called
- * when an item is clicked.
+
  */(/*
      * An on-click handler that we've defined to make it easy for an Activity to interface with
      * our RecyclerView
      */
     private val mClickHandler: ForecastAdapterOnClickHandler
 ) :
-    RecyclerView.Adapter<ForecastAdapter.ForecastAdapterViewHolder?>() {
+    RecyclerView.Adapter<ForecastAdapter.ForecastAdapterViewHolder?>(), Parcelable {
     private var mWeatherData: Array<String>? = null
 
     /**
@@ -37,7 +41,7 @@ class ForecastAdapter
      */
     inner class ForecastAdapterViewHolder(view: View) :
         RecyclerView.ViewHolder(view), View.OnClickListener {
-        val mWeatherTextView: TextView
+        val mWeatherTextView: TextView = view.findViewById<View>(R.id.tv_weather_data) as TextView
 
         /**
          * This gets called by the child views during a click.
@@ -45,14 +49,12 @@ class ForecastAdapter
          * @param v The View that was clicked
          */
         override fun onClick(v: View) {
-            val adapterPosition: Int = getAdapterPosition()
+            val adapterPosition: Int = adapterPosition
             val weatherForDay = mWeatherData!![adapterPosition]
             mClickHandler.onClick(weatherForDay)
         }
 
         init {
-            mWeatherTextView =
-                view.findViewById<View>(R.id.tv_weather_data) as TextView
             view.setOnClickListener(this)
         }
     }
@@ -64,16 +66,15 @@ class ForecastAdapter
      * @param viewGroup The ViewGroup that these ViewHolders are contained within.
      * @param viewType  If your RecyclerView has more than one type of item (which ours doesn't) you
      * can use this viewType integer to provide a different layout. See
-     * [android.support.v7.widget.RecyclerView.Adapter.getItemViewType]
      * for more details.
      * @return A new ForecastAdapterViewHolder that holds the View for each list item
      */
-    fun onCreateViewHolder(
+    override fun onCreateViewHolder(
         viewGroup: ViewGroup,
         viewType: Int
     ): ForecastAdapterViewHolder {
         val context = viewGroup.context
-        val layoutIdForListItem: Int = R.layout.forecast_list_item
+        val layoutIdForListItem = R.layout.forecast_list_item
         val inflater = LayoutInflater.from(context)
         val shouldAttachToParentImmediately = false
         val view =
@@ -91,7 +92,7 @@ class ForecastAdapter
      * contents of the item at the given position in the data set.
      * @param position                  The position of the item within the adapter's data set.
      */
-    fun onBindViewHolder(
+    override fun onBindViewHolder(
         forecastAdapterViewHolder: ForecastAdapterViewHolder,
         position: Int
     ) {
@@ -108,6 +109,10 @@ class ForecastAdapter
     val itemCount: Int
         get() = if (null == mWeatherData) 0 else mWeatherData!!.size
 
+    constructor() : this(TODO("mClickHandler")) {
+        mWeatherData = parcel.createStringArray()
+    }
+
     /**
      * This method is used to set the weather forecast on a ForecastAdapter if we've already
      * created one. This is handy when we get new data from the web but don't want to create a
@@ -115,9 +120,31 @@ class ForecastAdapter
      *
      * @param weatherData The new weather data to be displayed.
      */
-    fun setWeatherData(weatherData: Array<String?>?) {
+    fun setWeatherData(weatherData: Array<String>?) {
         mWeatherData = weatherData
         notifyDataSetChanged()
+    }
+
+    override fun getItemCount(): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeStringArray(mWeatherData)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<ForecastAdapter> {
+        override fun createFromParcel(parcel: Parcel): ForecastAdapter {
+            return ForecastAdapter()
+        }
+
+        override fun newArray(size: Int): Array<ForecastAdapter?> {
+            return arrayOfNulls(size)
+        }
     }
 
 }

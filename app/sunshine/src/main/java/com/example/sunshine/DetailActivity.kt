@@ -2,11 +2,12 @@ package com.example.sunshine
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.core.app.ShareCompat
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ShareCompat
+import com.example.android.sunshine.R
 
 
 class DetailActivity : AppCompatActivity() {
@@ -15,7 +16,7 @@ class DetailActivity : AppCompatActivity() {
      override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
-        mWeatherDisplay = findViewById<TextView>(R.id.tv_display_weather)
+        mWeatherDisplay = findViewById(R.id.tv_display_weather)
         val intentThatStartedThisActivity: Intent = intent
          if (intentThatStartedThisActivity.hasExtra(Intent.EXTRA_TEXT)) {
              mForecast = intentThatStartedThisActivity.getStringExtra(Intent.EXTRA_TEXT)
@@ -46,8 +47,6 @@ class DetailActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
-
-        // COMPLETED (7) Launch SettingsActivity when the Settings option is clicked
         if (id == R.id.action_settings) {
             val startSettingsActivity = Intent(this, SettingsActivity::class.java)
             startActivity(startSettingsActivity)
