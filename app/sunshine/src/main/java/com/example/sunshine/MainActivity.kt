@@ -4,12 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.app.LoaderManager.LoaderCallbacks
-import android.support.v4.content.AsyncTaskLoader
-import android.support.v4.content.Loader
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
@@ -17,38 +11,54 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.example.android.sunshine.data.SunshinePreferences
-import com.example.android.sunshine.utilities.NetworkUtils
-import com.example.android.sunshine.utilities.OpenWeatherJsonUtils
+import androidx.appcompat.app.AppCompatActivity
+import androidx.loader.app.LoaderManager
+import androidx.loader.content.AsyncTaskLoader
+import androidx.loader.content.Loader
+import com.example.android.sunshine.R
+import data.SunshinePreferences
+import utilities.NetworkUtils
+import utilities.OpenWeatherJsonUtils
 import java.net.URL
 
 
-// COMPLETED (1) Implement the proper LoaderCallbacks interface and the methods of that interface
-class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
-    LoaderCallbacks<Array<String?>?> {
+class MainActivity : AppCompatActivity(), ForecastAdapter.ForecastAdapterOnClickHandler,
+    LoaderManager.LoaderCallbacks<Array<String?>?> {
     private var mRecyclerView: RecyclerView? = null
     private var mForecastAdapter: ForecastAdapter? = null
     private var mErrorMessageDisplay: TextView? = null
     private var mLoadingIndicator: ProgressBar? = null
-    protected fun onCreate(savedInstanceState: Bundle?) {
+     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_forecast)
 
         /*
          * Using findViewById, we get a reference to our RecyclerView from xml. This allows us to
          * do things like set the adapter of the RecyclerView and toggle the visibility.
-         */mRecyclerView = findViewById(R.id.recyclerview_forecast) as RecyclerView?
+         */mRecyclerView = findViewById<RecyclerView>(R.id.recyclerview_forecast)
 
         /* This TextView is used to display errors and will be hidden if there are no errors */mErrorMessageDisplay =
             findViewById(R.id.tv_error_message_display) as TextView?
 
         /*
-         * LinearLayoutManager can support HORIZONTAL or VERTICAL orientations. The reverse layout
-         * parameter is useful mostly for HORIZONTAL layouts that should reverse for right to left
-         * languages.
+         * A LinearLayoutManager is responsible for measuring and positioning item views within a
+         * RecyclerView into a linear list. This means that it can produce either a horizontal or
+         * vertical list depending on which parameter you pass in to the LinearLayoutManager
+         * constructor. In our case, we want a vertical list, so we pass in the constant from the
+         * LinearLayoutManager class for vertical lists, LinearLayoutManager.VERTICAL.
+         *
+         * There are other LayoutManagers available to display your data in uniform grids,
+         * staggered grids, and more! See the developer documentation for more details.
          */
+        val recyclerViewOrientation: Int = LinearLayoutManager.VERTICAL
+
+        /*
+         *  This value should be true if you want to reverse your layout. Generally, this is only
+         *  true with horizontal lists that need to support a right-to-left layout.
+         */
+        val shouldReverseLayout = false
         val layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+            LinearLayoutManager(this, recyclerViewOrientation, shouldReverseLayout)
         mRecyclerView.setLayoutManager(layoutManager)
 
         /*
@@ -73,7 +83,6 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
          * circle. We didn't make the rules (or the names of Views), we just follow them.
          */mLoadingIndicator = findViewById(R.id.pb_loading_indicator) as ProgressBar?
 
-        // COMPLETED (7) Remove the code for the AsyncTask and initialize the AsyncTaskLoader
         /*
          * This ID will uniquely identify the Loader. We can use it, for example, to get a handle
          * on our Loader at a later point in time through the support LoaderManager.
@@ -86,7 +95,7 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
          * to the call to initLoader below. This means that whenever the loaderManager has
          * something to notify us of, it will do so through this callback.
          */
-        val callback: LoaderCallbacks<Array<String>> = this@MainActivity
+        val callback: MainActivity = this@MainActivity
 
         /*
          * The second parameter of the initLoader method below is a Bundle. Optionally, you can
@@ -100,9 +109,13 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
          * Ensures a loader is initialized and active. If the loader doesn't already exist, one is
          * created and (if the activity/fragment is currently started) starts the loader. Otherwise
          * the last created loader is re-used.
-         */getSupportLoaderManager().initLoader(loaderId, bundleForLoader, callback)
+         */supportLoaderManager.initLoader(loaderId, bundleForLoader, callback)
+        Log.d(
+            TAG,
+            "onCreate: registering preference changed listener"
+        )
     }
-    // COMPLETED (2) Within onCreateLoader, return a new AsyncTaskLoader that looks a lot like the existing FetchWeatherTask.
+
     /**
      * Instantiate and return a new Loader for the given ID.
      *
@@ -111,15 +124,15 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
      *
      * @return Return a new Loader instance that is ready to start loading.
      */
-    fun onCreateLoader(id: Int, loaderArgs: Bundle?): Loader<Array<String>> {
+    override fun onCreateLoader(id: Int, loaderArgs: Bundle?): AsyncTaskLoader<Array<String?>?> {
         return object : AsyncTaskLoader<Array<String?>?>(this) {
             /* This String array will hold and help cache our weather data */
             var mWeatherData: Array<String?>? = null
-            // COMPLETED (3) Cache the weather data in a member variable and deliver it in onStartLoading.
+
             /**
              * Subclasses of AsyncTaskLoader must implement this to take care of loading their data.
              */
-            protected fun onStartLoading() {
+             override fun onStartLoading() {
                 if (mWeatherData != null) {
                     deliverResult(mWeatherData)
                 } else {
@@ -135,7 +148,7 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
              * @return Weather data from OpenWeatherMap as an array of Strings.
              * null if an error occurs
              */
-            fun loadInBackground(): Array<String>? {
+            override fun loadInBackground(): Array<String?>? {
                 val locationQuery: String = SunshinePreferences
                     .getPreferredWeatherLocation(this@MainActivity)
                 val weatherRequestUrl: URL = NetworkUtils.buildUrl(locationQuery)
@@ -155,25 +168,25 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
              *
              * @param data The result of the load
              */
-            fun deliverResult(data: Array<String?>?) {
+            override fun deliverResult(data: Array<String?>?) {
                 mWeatherData = data
                 super.deliverResult(data)
             }
         }
     }
-    // COMPLETED (4) When the load is finished, show either the data or an error message if there is no data
+
     /**
      * Called when a previously created loader has finished its load.
      *
      * @param loader The Loader that has finished.
      * @param data The data generated by the Loader.
      */
-    fun onLoadFinished(
+    override fun onLoadFinished(
         loader: Loader<Array<String?>?>?,
         data: Array<String?>?
     ) {
         mLoadingIndicator!!.visibility = View.INVISIBLE
-        mForecastAdapter.setWeatherData(data)
+        mForecastAdapter!!.setWeatherData(data)
         if (null == data) {
             showErrorMessage()
         } else {
@@ -188,7 +201,7 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
      *
      * @param loader The Loader that is being reset.
      */
-    fun onLoaderReset(loader: Loader<Array<String?>?>?) {
+    override fun onLoaderReset(loader: Loader<Array<String?>?>?) {
         /*
          * We aren't using this method in our example application, but we are required to Override
          * it to implement the LoaderCallbacks<String> interface
@@ -200,7 +213,7 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
      * refresh of our data, you can see that there is no data showing.
      */
     private fun invalidateData() {
-        mForecastAdapter.setWeatherData(null)
+        mForecastAdapter!!.setWeatherData(null)
     }
 
     /**
@@ -219,7 +232,7 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
         val geoLocation = Uri.parse("geo:0,0?q=$addressString")
         val intent = Intent(Intent.ACTION_VIEW)
         intent.data = geoLocation
-        if (intent.resolveActivity(getPackageManager()) != null) {
+        if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
         } else {
             Log.d(
@@ -234,7 +247,7 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
      *
      * @param weatherForDay String describing weather details for a particular day
      */
-    fun onClick(weatherForDay: String?) {
+    override fun onClick(weatherForDay: String?) {
         val context: Context = this
         val destinationClass: Class<*> = DetailActivity::class.java
         val intentToStartDetailActivity = Intent(context, destinationClass)
@@ -270,10 +283,9 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
         /* Then, show the error */mErrorMessageDisplay!!.visibility = View.VISIBLE
     }
 
-    // COMPLETED (6) Remove any and all code from MainActivity that references FetchWeatherTask
-    fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         /* Use AppCompatActivity's method getMenuInflater to get a handle on the menu inflater */
-        val inflater: MenuInflater = getMenuInflater()
+        val inflater: MenuInflater = menuInflater
         /* Use the inflater's inflate method to inflate our menu layout to this menu */inflater.inflate(
             R.menu.forecast,
             menu
@@ -281,10 +293,8 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
         /* Return true so that the menu is displayed in the Toolbar */return true
     }
 
-    fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
-
-        // COMPLETED (5) Refactor the refresh functionality to work with our AsyncTaskLoader
         if (id == R.id.action_refresh) {
             invalidateData()
             getSupportLoaderManager().restartLoader(
@@ -296,6 +306,13 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
         }
         if (id == R.id.action_map) {
             openLocationInMap()
+            return true
+        }
+
+        // COMPLETED (6) Launch SettingsActivity when the Settings option is clicked
+        if (id == R.id.action_settings) {
+            val startSettingsActivity = Intent(this, SettingsActivity::class.java)
+            startActivity(startSettingsActivity)
             return true
         }
         return super.onOptionsItemSelected(item)

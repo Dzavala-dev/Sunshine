@@ -115,7 +115,7 @@ class ForecastAdapter
      *
      * @param weatherData The new weather data to be displayed.
      */
-    fun setWeatherData(weatherData: Array<String>?) {
+    fun setWeatherData(weatherData: Array<String?>?) {
         mWeatherData = weatherData
         notifyDataSetChanged()
     }
