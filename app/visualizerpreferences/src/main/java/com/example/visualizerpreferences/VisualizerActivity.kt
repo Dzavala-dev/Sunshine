@@ -32,9 +32,8 @@ class VisualizerActivity : AppCompatActivity(),
     }
     private fun setupSharedPreferences() {
         // Get all of the values from shared preferences to set it up
-        val sharedPreferences: SharedPreferences =
+        val sharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(this)
-        // COMPLETED (4) Use resources here instead of the hard coded string and boolean
         mVisualizerView!!.setShowBass(
             sharedPreferences.getBoolean(
                 getString(R.string.pref_show_bass_key),
@@ -47,14 +46,16 @@ class VisualizerActivity : AppCompatActivity(),
                 resources.getBoolean(R.bool.pref_show_mid_range_default)
             )
         )
-        mVisualizerView!!.setShowTreble(sharedPreferences.getBoolean(
-            getString(R.string.pref_show_treble_key),
-            resources.getBoolean(R.bool.pref_show_treble_default)
+        mVisualizerView!!.setShowTreble(
+            sharedPreferences.getBoolean(
+                getString(R.string.pref_show_treble_key),
+                resources.getBoolean(R.bool.pref_show_treble_default)
             )
         )
-        mVisualizerView!!.setMinSizeScale(1)
         loadColorFromPreferences(sharedPreferences)
+        loadSizeFromSharedPreferences(sharedPreferences)
 
+        // Register the listener
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
     }
 
@@ -65,6 +66,14 @@ class VisualizerActivity : AppCompatActivity(),
                 getString(R.string.pref_color_red_value)
             )!!
         )
+    }
+
+    private fun loadSizeFromSharedPreferences(sharedPreferences: SharedPreferences) {
+        val minSize = sharedPreferences.getString(
+            getString(R.string.pref_size_key),
+            getString(R.string.pref_size_default)
+        )!!.toFloat()
+        mVisualizerView!!.setMinSizeScale(minSize.toInt())
     }
 
     /**
@@ -86,7 +95,7 @@ class VisualizerActivity : AppCompatActivity(),
     override fun onSharedPreferenceChanged(
         sharedPreferences: SharedPreferences,
         key: String
-    ) {
+    ): Unit {
         when (key) {
             getString(R.string.pref_show_bass_key) -> {
                 mVisualizerView!!.setShowBass(
@@ -114,6 +123,9 @@ class VisualizerActivity : AppCompatActivity(),
             }
             getString(R.string.pref_color_key) -> {
                 loadColorFromPreferences(sharedPreferences)
+            }
+            getString(R.string.pref_size_key) -> {
+                loadSizeFromSharedPreferences(sharedPreferences)
             }
         }
     }
