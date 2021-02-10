@@ -13,6 +13,8 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/app/asynctaskloader" />
             <option value="$PROJECT_DIR$/app/loglifecycle" />
+            <option value="$PROJECT_DIR$/app/quizexample" />
+            <option value="$PROJECT_DIR$/app/quizexample/droidtermsprovider" />
             <option value="$PROJECT_DIR$/app/sunshine" />
             <option value="$PROJECT_DIR$/app/visualizerpreferences" />
             <option value="$PROJECT_DIR$/app/webpages-map-sharing" />
