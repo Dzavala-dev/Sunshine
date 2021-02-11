@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="vertical"
-    tools:context="com.udacity.example.quizexample.MainActivity">
+    tools:context="com.example.quizexample.MainActivity">
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
