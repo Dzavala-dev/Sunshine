@@ -35,13 +35,14 @@
       <list>
         <option value="layoutResourceFile_vertical" />
         <option value="layoutResourceFile" />
-        <option value="resourceFile" />
-        <option value="Kotlin Class" />
         <option value="valueResourceFile" />
+        <option value="Kotlin Class" />
+        <option value="resourceFile" />
       </list>
     </option>
   </component>
   <component name="ProjectId" id="1nl0pJ1OT4v3ecCI8nURkTv9yTv" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
     <property name="DeviceAndSnapshotComboBoxAction.selectedDevice" value="Nexus_5X_API_26" />
     <property name="DeviceAndSnapshotComboBoxAction.selectionTime" value="2021-02-08T22:29:54.919Z" />

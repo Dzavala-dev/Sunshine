@@ -1,13 +1,19 @@
 package com.example.sunshine
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.app.LoaderManager.LoaderCallbacks
-import android.support.v4.content.AsyncTaskLoader
-import android.support.v4.content.Loader
+import android.os.Parcel
+import android.os.Parcelable
+import androidx.core.app.LoaderManager.LoaderCallbacks
+import androidx.core.content.AsyncTaskLoader
+import androidx.core.content.Loader
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.preference.PreferenceManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -17,19 +23,32 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.loader.app.LoaderManager
+import androidx.loader.content.Loader
+import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.android.sunshine.R
 import com.example.android.sunshine.data.SunshinePreferences
 import com.example.android.sunshine.utilities.NetworkUtils
 import com.example.android.sunshine.utilities.OpenWeatherJsonUtils
+import data.SunshinePreferences
 import java.net.URL
 
 
-// COMPLETED (1) Implement the proper LoaderCallbacks interface and the methods of that interface
-class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
-    LoaderCallbacks<Array<String?>?> {
+class MainActivity() : AppCompatActivity(), ForecastAdapter.ForecastAdapterOnClickHandler,
+    LoaderManager.LoaderCallbacks<Array<String?>?>, OnSharedPreferenceChangeListener, Parcelable {
     private var mRecyclerView: RecyclerView? = null
     private var mForecastAdapter: ForecastAdapter? = null
     private var mErrorMessageDisplay: TextView? = null
     private var mLoadingIndicator: ProgressBar? = null
+
+    constructor(parcel: Parcel) : this() {
+        mForecastAdapter = parcel.readParcelable(ForecastAdapter::class.java.classLoader)
+    }
+
+    @SuppressLint("WrongConstant")
     protected fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_forecast)
@@ -37,18 +56,32 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
         /*
          * Using findViewById, we get a reference to our RecyclerView from xml. This allows us to
          * do things like set the adapter of the RecyclerView and toggle the visibility.
-         */mRecyclerView = findViewById(R.id.recyclerview_forecast) as RecyclerView?
+         */mRecyclerView = findViewById<RecyclerView>(R.id.recyclerview_forecast)
 
         /* This TextView is used to display errors and will be hidden if there are no errors */mErrorMessageDisplay =
-            findViewById(R.id.tv_error_message_display) as TextView?
+            findViewById<TextView>(
+                R.id.tv_error_message_display
+            )
 
         /*
-         * LinearLayoutManager can support HORIZONTAL or VERTICAL orientations. The reverse layout
-         * parameter is useful mostly for HORIZONTAL layouts that should reverse for right to left
-         * languages.
+         * A LinearLayoutManager is responsible for measuring and positioning item views within a
+         * RecyclerView into a linear list. This means that it can produce either a horizontal or
+         * vertical list depending on which parameter you pass in to the LinearLayoutManager
+         * constructor. In our case, we want a vertical list, so we pass in the constant from the
+         * LinearLayoutManager class for vertical lists, LinearLayoutManager.VERTICAL.
+         *
+         * There are other LayoutManagers available to display your data in uniform grids,
+         * staggered grids, and more! See the developer documentation for more details.
          */
+        val recyclerViewOrientation: Int = LinearLayoutManager.VERTICAL
+
+        /*
+         *  This value should be true if you want to reverse your layout. Generally, this is only
+         *  true with horizontal lists that need to support a right-to-left layout.
+         */
+        val shouldReverseLayout = false
         val layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+            LinearLayoutManager(this, recyclerViewOrientation, shouldReverseLayout)
         mRecyclerView.setLayoutManager(layoutManager)
 
         /*
@@ -73,7 +106,6 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
          * circle. We didn't make the rules (or the names of Views), we just follow them.
          */mLoadingIndicator = findViewById(R.id.pb_loading_indicator) as ProgressBar?
 
-        // COMPLETED (7) Remove the code for the AsyncTask and initialize the AsyncTaskLoader
         /*
          * This ID will uniquely identify the Loader. We can use it, for example, to get a handle
          * on our Loader at a later point in time through the support LoaderManager.
@@ -101,8 +133,20 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
          * created and (if the activity/fragment is currently started) starts the loader. Otherwise
          * the last created loader is re-used.
          */getSupportLoaderManager().initLoader(loaderId, bundleForLoader, callback)
+        Log.d(
+            TAG,
+            "onCreate: registering preference changed listener"
+        )
+
+        // COMPLETED (6) Register MainActivity as a OnSharedPreferenceChangedListener in onCreate
+        /*
+         * Register MainActivity as an OnPreferenceChangedListener to receive a callback when a
+         * SharedPreference has changed. Please note that we must unregister MainActivity as an
+         * OnSharedPreferenceChanged listener in onDestroy to avoid any memory leaks.
+         */PreferenceManager.getDefaultSharedPreferences(this)
+            .registerOnSharedPreferenceChangeListener(this)
     }
-    // COMPLETED (2) Within onCreateLoader, return a new AsyncTaskLoader that looks a lot like the existing FetchWeatherTask.
+
     /**
      * Instantiate and return a new Loader for the given ID.
      *
@@ -115,7 +159,7 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
         return object : AsyncTaskLoader<Array<String?>?>(this) {
             /* This String array will hold and help cache our weather data */
             var mWeatherData: Array<String?>? = null
-            // COMPLETED (3) Cache the weather data in a member variable and deliver it in onStartLoading.
+
             /**
              * Subclasses of AsyncTaskLoader must implement this to take care of loading their data.
              */
@@ -161,7 +205,7 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
             }
         }
     }
-    // COMPLETED (4) When the load is finished, show either the data or an error message if there is no data
+
     /**
      * Called when a previously created loader has finished its load.
      *
@@ -173,7 +217,7 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
         data: Array<String?>?
     ) {
         mLoadingIndicator!!.visibility = View.INVISIBLE
-        mForecastAdapter.setWeatherData(data)
+        mForecastAdapter!!.setWeatherData(data)
         if (null == data) {
             showErrorMessage()
         } else {
@@ -200,7 +244,7 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
      * refresh of our data, you can see that there is no data showing.
      */
     private fun invalidateData() {
-        mForecastAdapter.setWeatherData(null)
+        mForecastAdapter!!.setWeatherData(null)
     }
 
     /**
@@ -215,7 +259,8 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
      * open the Common Intents page
      */
     private fun openLocationInMap() {
-        val addressString = "1600 Ampitheatre Parkway, CA"
+        // COMPLETED (9) Use preferred location rather than a default location to display in the map
+        val addressString: String = SunshinePreferences.getPreferredWeatherLocation(this)
         val geoLocation = Uri.parse("geo:0,0?q=$addressString")
         val intent = Intent(Intent.ACTION_VIEW)
         intent.data = geoLocation
@@ -269,22 +314,58 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
         mRecyclerView.setVisibility(View.INVISIBLE)
         /* Then, show the error */mErrorMessageDisplay!!.visibility = View.VISIBLE
     }
+    // COMPLETED (7) In onStart, if preferences have been changed, refresh the data and set the flag to false
+    /**
+     * OnStart is called when the Activity is coming into view. This happens when the Activity is
+     * first created, but also happens when the Activity is returned to from another Activity. We
+     * are going to use the fact that onStart is called when the user returns to this Activity to
+     * check if the location setting or the preferred units setting has changed. If it has changed,
+     * we are going to perform a new query.
+     */
+    protected override fun onStart() {
+        super.onStart()
 
-    // COMPLETED (6) Remove any and all code from MainActivity that references FetchWeatherTask
-    fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        /*
+         * If the preferences for location or units have changed since the user was last in
+         * MainActivity, perform another query and set the flag to false.
+         *
+         * This isn't the ideal solution because there really isn't a need to perform another
+         * GET request just to change the units, but this is the simplest solution that gets the
+         * job done for now. Later in this course, we are going to show you more elegant ways to
+         * handle converting the units from celsius to fahrenheit and back without hitting the
+         * network again by keeping a copy of the data in a manageable format.
+         */if (PREFERENCES_HAVE_BEEN_UPDATED) {
+            Log.d(TAG, "onStart: preferences were updated")
+            getSupportLoaderManager().restartLoader(
+                FORECAST_LOADER_ID,
+                null,
+                this
+            )
+            PREFERENCES_HAVE_BEEN_UPDATED = false
+        }
+    }
+
+    // COMPLETED (8) Override onDestroy and unregister MainActivity as a SharedPreferenceChangedListener
+    protected override fun onDestroy() {
+        super.onDestroy()
+
+        /* Unregister MainActivity as an OnPreferenceChangedListener to avoid any memory leaks. */PreferenceManager.getDefaultSharedPreferences(
+            this
+        )
+            .unregisterOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         /* Use AppCompatActivity's method getMenuInflater to get a handle on the menu inflater */
         val inflater: MenuInflater = getMenuInflater()
         /* Use the inflater's inflate method to inflate our menu layout to this menu */inflater.inflate(
-            R.menu.forecast,
-            menu
+            R.menu.forecast, menu
         )
         /* Return true so that the menu is displayed in the Toolbar */return true
     }
 
-    fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
-
-        // COMPLETED (5) Refactor the refresh functionality to work with our AsyncTaskLoader
         if (id == R.id.action_refresh) {
             invalidateData()
             getSupportLoaderManager().restartLoader(
@@ -298,11 +379,63 @@ class MainActivity : AppCompatActivity(), ForecastAdapterOnClickHandler,
             openLocationInMap()
             return true
         }
+        if (id == R.id.action_settings) {
+            val startSettingsActivity = Intent(this, SettingsActivity::class.java)
+            startActivity(startSettingsActivity)
+            return true
+        }
         return super.onOptionsItemSelected(item)
+    }
+
+    // COMPLETED (5) Override onSharedPreferenceChanged to set the preferences flag to true
+    override fun onSharedPreferenceChanged(
+        sharedPreferences: SharedPreferences,
+        s: String
+    ) {
+        /*
+         * Set this flag to true so that when control returns to MainActivity, it can refresh the
+         * data.
+         *
+         * This isn't the ideal solution because there really isn't a need to perform another
+         * GET request just to change the units, but this is the simplest solution that gets the
+         * job done for now. Later in this course, we are going to show you more elegant ways to
+         * handle converting the units from celsius to fahrenheit and back without hitting the
+         * network again by keeping a copy of the data in a manageable format.
+         */
+        PREFERENCES_HAVE_BEEN_UPDATED = true
     }
 
     companion object {
         private val TAG = MainActivity::class.java.simpleName
         private const val FORECAST_LOADER_ID = 0
+
+        // COMPLETED (4) Add a private static boolean flag for preference updates and initialize it to false
+        private var PREFERENCES_HAVE_BEEN_UPDATED = false
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeParcelable(mForecastAdapter, flags)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<MainActivity> {
+        override fun createFromParcel(parcel: Parcel): MainActivity {
+            return MainActivity(parcel)
+        }
+
+        override fun newArray(size: Int): Array<MainActivity?> {
+            return arrayOfNulls(size)
+        }
+    }
+
+    override fun onLoadFinished(loader: Loader<Array<String?>?>, data: Array<String?>?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onLoaderReset(loader: Loader<Array<String?>?>) {
+        TODO("Not yet implemented")
     }
 }
