@@ -1,70 +1,84 @@
 package com.example.sunshine
 
-import android.content.Context
-import android.database.Cursor
+import android.os.Parcel
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.annotation.NonNull
 import androidx.recyclerview.widget.RecyclerView
-import utilities.SunshineDateUtils
-import utilities.SunshineWeatherUtils
+import com.example.android.sunshine.R
 
 
 /**
- * [ForecastAdapter] exposes a list of weather forecasts
- * from a [android.database.Cursor] to a [android.support.v7.widget.RecyclerView].
+ * [ForecastAdapter] exposes a list of weather forecasts to a
+
  */
-internal class ForecastAdapter
+@Suppress("UNREACHABLE_CODE")
+class ForecastAdapter
 /**
  * Creates a ForecastAdapter.
  *
- * @param context Used to talk to the UI and app resources
- * @param clickHandler The on-click handler for this adapter. This single handler is called
- * when an item is clicked.
- */(
-    /* The context we use to utility methods, app resources and layout inflaters */
-    @param:NonNull private val mContext: Context,
-    /*
-     * Below, we've defined an interface to handle clicks on items within this Adapter. In the
-     * constructor of our ForecastAdapter, we receive an instance of a class that has implemented
-     * said interface. We store that instance in this variable to call the onClick method whenever
-     * an item is clicked in the list.
+
+ */(/*
+     * An on-click handler that we've defined to make it easy for an Activity to interface with
+     * our RecyclerView
      */
     private val mClickHandler: ForecastAdapterOnClickHandler
 ) :
-    RecyclerView.Adapter<ForecastAdapter.ForecastAdapterViewHolder?>() {
+    RecyclerView.Adapter<ForecastAdapter.ForecastAdapterViewHolder?>(), Parcelable {
+    private var mWeatherData: Array<String>? = null
 
     /**
      * The interface that receives onClick messages.
      */
     interface ForecastAdapterOnClickHandler {
-        //      COMPLETED (36) Refactor onClick to accept a long as its parameter rather than a String
-        fun onClick(date: Long)
+        fun onClick(weatherForDay: String?)
     }
 
-    private var mCursor: Cursor? = null
+    /**
+     * Cache of the children views for a forecast list item.
+     */
+    inner class ForecastAdapterViewHolder(view: View) :
+        RecyclerView.ViewHolder(view), View.OnClickListener {
+        val mWeatherTextView: TextView = view.findViewById<View>(R.id.tv_weather_data) as TextView
+
+        /**
+         * This gets called by the child views during a click.
+         *
+         * @param v The View that was clicked
+         */
+        override fun onClick(v: View) {
+            val adapterPosition: Int = adapterPosition
+            val weatherForDay = mWeatherData!![adapterPosition]
+            mClickHandler.onClick(weatherForDay)
+        }
+
+        init {
+            view.setOnClickListener(this)
+        }
+    }
 
     /**
      * This gets called when each new ViewHolder is created. This happens when the RecyclerView
      * is laid out. Enough ViewHolders will be created to fill the screen and allow for scrolling.
      *
      * @param viewGroup The ViewGroup that these ViewHolders are contained within.
-     * @param viewType  If your RecyclerView has more than one type of item (like ours does) you
+     * @param viewType  If your RecyclerView has more than one type of item (which ours doesn't) you
      * can use this viewType integer to provide a different layout. See
-     * [android.support.v7.widget.RecyclerView.Adapter.getItemViewType]
      * for more details.
      * @return A new ForecastAdapterViewHolder that holds the View for each list item
      */
-    fun onCreateViewHolder(
-        viewGroup: ViewGroup?,
+    override fun onCreateViewHolder(
+        viewGroup: ViewGroup,
         viewType: Int
     ): ForecastAdapterViewHolder {
-        val view = LayoutInflater
-            .from(mContext)
-            .inflate(R.layout.forecast_list_item, viewGroup, false)
-        view.isFocusable = true
+        val context = viewGroup.context
+        val layoutIdForListItem = R.layout.forecast_list_item
+        val inflater = LayoutInflater.from(context)
+        val shouldAttachToParentImmediately = false
+        val view =
+            inflater.inflate(layoutIdForListItem, viewGroup, shouldAttachToParentImmediately)
         return ForecastAdapterViewHolder(view)
     }
 
@@ -82,28 +96,8 @@ internal class ForecastAdapter
         forecastAdapterViewHolder: ForecastAdapterViewHolder,
         position: Int
     ) {
-        mCursor!!.moveToPosition(position)
-        /*******************
-         * Weather Summary *
-         */
-        /* Read date from the cursor */  val dateInMillis =
-            mCursor!!.getLong(MainActivity.INDEX_WEATHER_DATE)
-        /* Get human readable string using our utility method */
-        val dateString: String =
-            SunshineDateUtils.getFriendlyDateString(mContext, dateInMillis, false)
-        /* Use the weatherId to obtain the proper description */
-        val weatherId = mCursor!!.getInt(MainActivity.INDEX_WEATHER_CONDITION_ID)
-        val description: String =
-            SunshineWeatherUtils.getStringForWeatherCondition(mContext, weatherId)
-        /* Read high temperature from the cursor (in degrees celsius) */
-        val highInCelsius = mCursor!!.getDouble(MainActivity.INDEX_WEATHER_MAX_TEMP)
-        /* Read low temperature from the cursor (in degrees celsius) */
-        val lowInCelsius = mCursor!!.getDouble(MainActivity.INDEX_WEATHER_MIN_TEMP)
-        val highAndLowTemperature: String =
-            SunshineWeatherUtils.formatHighLows(mContext, highInCelsius, lowInCelsius)
-        val weatherSummary =
-            "$dateString - $description - $highAndLowTemperature"
-        forecastAdapterViewHolder.weatherSummary.text = weatherSummary
+        val weatherForThisDay = mWeatherData!![position]
+        forecastAdapterViewHolder.mWeatherTextView.text = weatherForThisDay
     }
 
     /**
@@ -113,48 +107,43 @@ internal class ForecastAdapter
      * @return The number of items available in our forecast
      */
     val itemCount: Int
-        get() = if (null == mCursor) 0 else mCursor!!.count
+        get() = if (null == mWeatherData) 0 else mWeatherData!!.size
 
-    /**
-     * Swaps the cursor used by the ForecastAdapter for its weather data. This method is called by
-     * MainActivity after a load has finished, as well as when the Loader responsible for loading
-     * the weather data is reset. When this method is called, we assume we have a completely new
-     * set of data, so we call notifyDataSetChanged to tell the RecyclerView to update.
-     *
-     * @param newCursor the new cursor to use as ForecastAdapter's data source
-     */
-    fun swapCursor(newCursor: Cursor?) {
-        mCursor = newCursor
-        notifyDataSetChanged()
+    constructor() : this(TODO("mClickHandler")) {
+        mWeatherData = parcel.createStringArray()
     }
 
     /**
-     * A ViewHolder is a required part of the pattern for RecyclerViews. It mostly behaves as
-     * a cache of the child views for a forecast item. It's also a convenient place to set an
-     * OnClickListener, since it has access to the adapter and the views.
+     * This method is used to set the weather forecast on a ForecastAdapter if we've already
+     * created one. This is handy when we get new data from the web but don't want to create a
+     * new ForecastAdapter to display it.
+     *
+     * @param weatherData The new weather data to be displayed.
      */
-    internal inner class ForecastAdapterViewHolder(view: View) :
-        RecyclerView.ViewHolder(view), View.OnClickListener {
-        val weatherSummary: TextView
+    fun setWeatherData(weatherData: Array<String>?) {
+        mWeatherData = weatherData
+        notifyDataSetChanged()
+    }
 
-        /**
-         * This gets called by the child views during a click. We fetch the date that has been
-         * selected, and then call the onClick handler registered with this adapter, passing that
-         * date.
-         *
-         * @param v the View that was clicked
-         */
-        override fun onClick(v: View) {
-            val adapterPosition: Int = getAdapterPosition()
-            //          COMPLETED (37) Instead of passing the String for the clicked item, pass the date from the cursor
-            mCursor!!.moveToPosition(adapterPosition)
-            val dateInMillis = mCursor!!.getLong(MainActivity.INDEX_WEATHER_DATE)
-            mClickHandler.onClick(dateInMillis)
+    override fun getItemCount(): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeStringArray(mWeatherData)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<ForecastAdapter> {
+        override fun createFromParcel(parcel: Parcel): ForecastAdapter {
+            return ForecastAdapter()
         }
 
-        init {
-            weatherSummary = view.findViewById<View>(R.id.tv_weather_data) as TextView
-            view.setOnClickListener(this)
+        override fun newArray(size: Int): Array<ForecastAdapter?> {
+            return arrayOfNulls(size)
         }
     }
 
