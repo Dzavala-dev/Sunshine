@@ -4,12 +4,6 @@ import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
-import androidx.core.app.LoaderManager
-import androidx.core.content.CursorLoader
-import androidx.core.content.Loader
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
@@ -22,9 +16,6 @@ import androidx.loader.content.CursorLoader
 import androidx.loader.content.Loader
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.android.sunshine.data.SunshinePreferences
-import com.example.android.sunshine.data.WeatherContract
-import com.example.android.sunshine.utilities.FakeDataUtils
 import data.SunshinePreferences
 import data.WeatherContract
 import utilities.FakeDataUtils
