@@ -14,6 +14,8 @@
             <option value="$PROJECT_DIR$/app/asynctaskloader" />
             <option value="$PROJECT_DIR$/app/loglifecycle" />
             <option value="$PROJECT_DIR$/app/sunshine" />
+            <option value="$PROJECT_DIR$/app/to_do_list_2" />
+            <option value="$PROJECT_DIR$/app/todolist" />
             <option value="$PROJECT_DIR$/app/visualizerpreferences" />
             <option value="$PROJECT_DIR$/app/webpages-map-sharing" />
           </set>
