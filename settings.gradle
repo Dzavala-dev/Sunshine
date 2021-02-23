@@ -1,3 +1,5 @@
+include ':app:to_do_list_2'
+include ':app:todolist'
 rootProject.name='Sunshine'
 include ':app'
 include ':app:loglifecycle'
