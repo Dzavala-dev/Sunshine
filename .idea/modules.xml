@@ -2,13 +2,15 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Sunshine.iml" filepath="$PROJECT_DIR$/Sunshine.iml" group="Sunshine" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="Sunshine/app" />
-      <module fileurl="file://$PROJECT_DIR$/app/asynctaskloader/asynctaskloader.iml" filepath="$PROJECT_DIR$/app/asynctaskloader/asynctaskloader.iml" group="Sunshine/app/asynctaskloader" />
-      <module fileurl="file://$PROJECT_DIR$/app/loglifecycle/loglifecycle.iml" filepath="$PROJECT_DIR$/app/loglifecycle/loglifecycle.iml" group="Sunshine/app/loglifecycle" />
-      <module fileurl="file://$PROJECT_DIR$/app/sunshine/sunshine.iml" filepath="$PROJECT_DIR$/app/sunshine/sunshine.iml" group="Sunshine/app/sunshine" />
-      <module fileurl="file://$PROJECT_DIR$/app/visualizerpreferences/visualizerpreferences.iml" filepath="$PROJECT_DIR$/app/visualizerpreferences/visualizerpreferences.iml" group="Sunshine/app/visualizerpreferences" />
-      <module fileurl="file://$PROJECT_DIR$/app/webpages-map-sharing/webpages-map-sharing.iml" filepath="$PROJECT_DIR$/app/webpages-map-sharing/webpages-map-sharing.iml" group="Sunshine/app/webpages-map-sharing" />
+      <module fileurl="file://$PROJECT_DIR$/Sunshine.iml" filepath="$PROJECT_DIR$/Sunshine.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Sunshine.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Sunshine.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/asynctaskloader/Sunshine.app.asynctaskloader.iml" filepath="$PROJECT_DIR$/.idea/modules/app/asynctaskloader/Sunshine.app.asynctaskloader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/loglifecycle/Sunshine.app.loglifecycle.iml" filepath="$PROJECT_DIR$/.idea/modules/app/loglifecycle/Sunshine.app.loglifecycle.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/sunshine/Sunshine.app.sunshine.iml" filepath="$PROJECT_DIR$/.idea/modules/app/sunshine/Sunshine.app.sunshine.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/to_do_list_2/Sunshine.app.to_do_list_2.iml" filepath="$PROJECT_DIR$/.idea/modules/app/to_do_list_2/Sunshine.app.to_do_list_2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/todolist/Sunshine.app.todolist.iml" filepath="$PROJECT_DIR$/.idea/modules/app/todolist/Sunshine.app.todolist.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/visualizerpreferences/Sunshine.app.visualizerpreferences.iml" filepath="$PROJECT_DIR$/.idea/modules/app/visualizerpreferences/Sunshine.app.visualizerpreferences.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/webpages-map-sharing/Sunshine.app.webpages-map-sharing.iml" filepath="$PROJECT_DIR$/.idea/modules/app/webpages-map-sharing/Sunshine.app.webpages-map-sharing.iml" />
     </modules>
   </component>
 </project>
