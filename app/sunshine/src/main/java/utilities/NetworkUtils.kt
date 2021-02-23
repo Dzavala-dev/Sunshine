@@ -1,12 +1,9 @@
 package utilities
 
-import android.content.ContentValues.TAG
+import android.content.Context
 import android.net.Uri
-import android.service.controls.ControlsProviderService.TAG
 import android.util.Log
-import androidx.constraintlayout.motion.utils.Oscillator.TAG
-import androidx.constraintlayout.motion.widget.MotionScene.TAG
-import androidx.constraintlayout.widget.StateSet.TAG
+import data.SunshinePreferences
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
@@ -17,12 +14,26 @@ import java.util.*
 /**
  * These utilities will be used to communicate with the weather servers.
  */
-class NetworkUtils {
+object NetworkUtils {
     private val TAG = NetworkUtils::class.java.simpleName
-    private  val DYNAMIC_WEATHER_URL = "https://andfun-weather.udacity.com/weather"
-    private  val STATIC_WEATHER_URL =
+
+    /*
+     * Sunshine was originally built to use OpenWeatherMap's API. However, we wanted to provide
+     * a way to much more easily test the app and provide more varied weather data. After all, in
+     * Mountain View (Google's HQ), it gets very boring looking at a forecast of perfectly clear
+     * skies at 75°F every day... (UGH!) The solution we came up with was to host our own fake
+     * weather server. With this server, there are two URL's you can use. The first (and default)
+     * URL will return dynamic weather data. Each time the app refreshes, you will get different,
+     * completely random weather data. This is incredibly useful for testing the robustness of your
+     * application, as different weather JSON will provide edge cases for some of your methods.
+     *
+     * If you'd prefer to test with the weather data that you will see in the videos on Udacity,
+     * you can do so by setting the FORECAST_BASE_URL to STATIC_WEATHER_URL below.
+     */
+    private const val DYNAMIC_WEATHER_URL = "https://andfun-weather.udacity.com/weather"
+    private const val STATIC_WEATHER_URL =
         "https://andfun-weather.udacity.com/staticweather"
-    private val FORECAST_BASE_URL: String = NetworkUtils.STATIC_WEATHER_URL
+    private const val FORECAST_BASE_URL = STATIC_WEATHER_URL
 
     /*
      * NOTE: These values only effect responses from OpenWeatherMap, NOT from the fake weather
@@ -31,19 +42,91 @@ class NetworkUtils {
      * we are not going to show you how to do so in this course.
      */
     /* The format we want our API to return */
-    private  val format = "json"
+    private const val format = "json"
 
     /* The units we want our API to return */
-    private  val units = "metric"
+    private const val units = "metric"
 
     /* The number of days we want our API to return */
-    private  val numDays = 14
-     val QUERY_PARAM = "q"
-     val LAT_PARAM = "lat"
-     val LON_PARAM = "lon"
-     val FORMAT_PARAM = "mode"
-     val UNITS_PARAM = "units"
-     val DAYS_PARAM = "cnt"
+    private const val numDays = 14
+
+    /* The query parameter allows us to provide a location string to the API */
+    private const val QUERY_PARAM = "q"
+    private const val LAT_PARAM = "lat"
+    private const val LON_PARAM = "lon"
+
+    /* The format parameter allows us to designate whether we want JSON or XML from our API */
+    private const val FORMAT_PARAM = "mode"
+
+    /* The units parameter allows us to designate whether we want metric units or imperial units */
+    private const val UNITS_PARAM = "units"
+
+    /* The days parameter allows us to designate how many days of weather data we want */
+    private const val DAYS_PARAM = "cnt"
+
+    /**
+     * Retrieves the proper URL to query for the weather data. The reason for both this method as
+     * well as [.buildUrlWithLocationQuery] is two fold.
+     *
+     *
+     * 1) You should be able to just use one method when you need to create the URL within the
+     * app instead of calling both methods.
+     * 2) Later in Sunshine, you are going to add an alternate method of allowing the user
+     * to select their preferred location. Once you do so, there will be another way to form
+     * the URL using a latitude and longitude rather than just a location String. This method
+     * will "decide" which URL to build and return it.
+     *
+     * @param context used to access other Utility methods
+     * @return URL to query weather service
+     */
+    fun getUrl(context: Context?): URL? {
+        return if (SunshinePreferences.isLocationLatLonAvailable(context)) {
+            val preferredCoordinates: DoubleArray =
+                SunshinePreferences.getLocationCoordinates(context)
+            val latitude = preferredCoordinates[0]
+            val longitude = preferredCoordinates[1]
+            buildUrlWithLatitudeLongitude(latitude, longitude)
+        } else {
+            val locationQuery: String? =
+                context?.let { SunshinePreferences.getPreferredWeatherLocation(it) }
+            if (locationQuery != null) {
+                buildUrlWithLocationQuery(locationQuery
+            })
+        }
+    }
+
+    /**
+     * Builds the URL used to talk to the weather server using latitude and longitude of a
+     * location.
+     *
+     * @param latitude  The latitude of the location
+     * @param longitude The longitude of the location
+     * @return The Url to use to query the weather server.
+     */
+    private fun buildUrlWithLatitudeLongitude(
+        latitude: Double,
+        longitude: Double
+    ): URL? {
+        val weatherQueryUri =
+            Uri.parse(FORECAST_BASE_URL).buildUpon()
+                .appendQueryParameter(LAT_PARAM, latitude.toString())
+                .appendQueryParameter(LON_PARAM, longitude.toString())
+                .appendQueryParameter(FORMAT_PARAM, format)
+                .appendQueryParameter(UNITS_PARAM, units)
+                .appendQueryParameter(
+                    DAYS_PARAM,
+                    numDays.toString()
+                )
+                .build()
+        return try {
+            val weatherQueryUrl = URL(weatherQueryUri.toString())
+            Log.v(TAG, "URL: $weatherQueryUrl")
+            weatherQueryUrl
+        } catch (e: MalformedURLException) {
+            e.printStackTrace()
+            null
+        }
+    }
 
     /**
      * Builds the URL used to talk to the weather server using a location. This location is based
@@ -52,45 +135,32 @@ class NetworkUtils {
      * @param locationQuery The location that will be queried for.
      * @return The URL to use to query the weather server.
      */
-    fun buildUrl(locationQuery: String?): URL? {
-        val builtUri =
-            Uri.parse(NetworkUtils.FORECAST_BASE_URL).buildUpon()
-                .appendQueryParameter(NetworkUtils.QUERY_PARAM, locationQuery)
-                .appendQueryParameter(NetworkUtils.FORMAT_PARAM, NetworkUtils.format)
-                .appendQueryParameter(NetworkUtils.UNITS_PARAM, NetworkUtils.units)
+    private fun buildUrlWithLocationQuery(locationQuery: String): URL? {
+        val weatherQueryUri =
+            Uri.parse(FORECAST_BASE_URL).buildUpon()
+                .appendQueryParameter(QUERY_PARAM, locationQuery)
+                .appendQueryParameter(FORMAT_PARAM, format)
+                .appendQueryParameter(UNITS_PARAM, units)
                 .appendQueryParameter(
-                    NetworkUtils.DAYS_PARAM,
-                    Integer.toString(NetworkUtils.numDays)
+                    DAYS_PARAM,
+                    numDays.toString()
                 )
                 .build()
-        var url: URL? = null
-        try {
-            url = URL(builtUri.toString())
+        return try {
+            val weatherQueryUrl = URL(weatherQueryUri.toString())
+            Log.v(TAG, "URL: $weatherQueryUrl")
+            weatherQueryUrl
         } catch (e: MalformedURLException) {
             e.printStackTrace()
+            null
         }
-        Log.v(NetworkUtils.TAG, "Built URI $url")
-        return url
-    }
-
-    /**
-     * Builds the URL used to talk to the weather server using latitude and longitude of a
-     * location.
-     *
-     * @param lat The latitude of the location
-     * @param lon The longitude of the location
-     * @return The Url to use to query the weather server.
-     */
-    fun buildUrl(lat: Double?, lon: Double?): URL? {
-        /** This will be implemented in a future lesson  */
-        return null
     }
 
     /**
      * This method returns the entire result from the HTTP response.
      *
      * @param url The URL to fetch the HTTP response from.
-     * @return The contents of the HTTP response.
+     * @return The contents of the HTTP response, null if no response
      * @throws IOException Related to network and stream reading
      */
     @Throws(IOException::class)
@@ -102,11 +172,12 @@ class NetworkUtils {
             val scanner = Scanner(`in`)
             scanner.useDelimiter("\\A")
             val hasInput = scanner.hasNext()
+            var response: String? = null
             if (hasInput) {
-                scanner.next()
-            } else {
-                null
+                response = scanner.next()
             }
+            scanner.close()
+            response
         } finally {
             urlConnection.disconnect()
         }
