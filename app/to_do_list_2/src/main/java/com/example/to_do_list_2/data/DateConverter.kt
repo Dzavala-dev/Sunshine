@@ -3,6 +3,7 @@ package com.example.to_do_list_2.data
 import androidx.room.TypeConverter
 import java.util.*
 
+
 object DateConverter {
     @TypeConverter
     fun toDate(timestamp: Long?): Date? {
@@ -14,4 +15,3 @@ object DateConverter {
         return date?.time
     }
 }
-

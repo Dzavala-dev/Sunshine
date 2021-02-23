@@ -2,8 +2,10 @@ package com.example.to_do_list_2
 
 import android.os.Handler
 import android.os.Looper
+import androidx.annotation.NonNull
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
+
 
 /**
  * Global executor pools for the whole application.
@@ -39,21 +41,25 @@ class AppExecutors private constructor(
     }
 
     companion object {
+        fun getInstance() {
+
+        }
+
         // For Singleton instantiation
         private val LOCK = Any()
-        private val sInstance: AppExecutors? = null
-        val instance: AppExecutors
+        private var sInstance: AppExecutors? = null
+        val instance: AppExecutors?
             get() {
-                if (AppExecutors.Companion.sInstance == null) {
-                    synchronized(AppExecutors.Companion.LOCK) {
-                        AppExecutors.Companion.sInstance = AppExecutors(
+                if (sInstance == null) {
+                    synchronized(LOCK) {
+                        sInstance = AppExecutors(
                             Executors.newSingleThreadExecutor(),
                             Executors.newFixedThreadPool(3),
-                            AppExecutors.MainThreadExecutor()
+                            MainThreadExecutor()
                         )
                     }
                 }
-                return AppExecutors.Companion.sInstance
+                return sInstance
             }
     }
 

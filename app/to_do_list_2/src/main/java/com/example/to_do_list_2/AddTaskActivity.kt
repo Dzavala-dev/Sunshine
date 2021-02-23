@@ -1,11 +1,13 @@
 package com.example.to_do_list_2
 
+import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.RadioGroup
+import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProviders
 import com.example.android.todolist.R
 import com.example.to_do_list_2.data.AppDatabase
 import com.example.to_do_list_2.data.TaskEntry
@@ -21,27 +23,48 @@ class AddTaskActivity : AppCompatActivity() {
 
     // Member variable for the Database
     private var mDb: AppDatabase? = null
-    override fun onCreate(savedInstanceState: Bundle?) {
+     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_task)
         initViews()
-        mDb = AppDatabase.getInstance(applicationContext)
+        mDb = AppDatabase.getInstance(getApplicationContext())
         if (savedInstanceState != null && savedInstanceState.containsKey(INSTANCE_TASK_ID)) {
             mTaskId = savedInstanceState.getInt(
                 INSTANCE_TASK_ID,
                 DEFAULT_TASK_ID
             )
         }
-        val intent = intent
+        val intent: Intent = getIntent()
         if (intent != null && intent.hasExtra(EXTRA_TASK_ID)) {
-            mButton!!.setText(R.string.update_button)
+            mButton?.setText(R.string.update_button)
             if (mTaskId == DEFAULT_TASK_ID) {
                 // populate the UI
+                mTaskId = intent.getIntExtra(
+                    EXTRA_TASK_ID,
+                    DEFAULT_TASK_ID
+                )
+
+                // COMPLETED (9) Remove the logging and the call to loadTaskById, this is done in the ViewModel now
+                // COMPLETED (10) Declare a AddTaskViewModelFactory using mDb and mTaskId
+                val factory = mDb?.let { AddTaskViewModelFactory(it, mTaskId) }
+                // COMPLETED (11) Declare a AddTaskViewModel variable and initialize it by calling ViewModelProviders.of
+                // for that use the factory created above AddTaskViewModel
+                val viewModel: AddTaskViewModel = ViewModelProviders.of(this, factory).get(
+                    AddTaskViewModel::class.java
+                )
+
+                // COMPLETED (12) Observe the LiveData object in the ViewModel. Use it also when removing the observer
+                viewModel.getTask().observe(this, object : Observer<TaskEntry?>() {
+                    fun onChanged(@Nullable taskEntry: TaskEntry?) {
+                        viewModel.getTask().removeObserver(this)
+                        populateUI(taskEntry)
+                    }
+                })
             }
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
+     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt(INSTANCE_TASK_ID, mTaskId)
         super.onSaveInstanceState(outState)
     }
@@ -53,7 +76,7 @@ class AddTaskActivity : AppCompatActivity() {
         mEditText = findViewById(R.id.editTextTaskDescription)
         mRadioGroup = findViewById(R.id.radioGroup)
         mButton = findViewById(R.id.saveButton)
-        mButton.setOnClickListener(View.OnClickListener { onSaveButtonClicked() })
+        mButton!!.setOnClickListener { onSaveButtonClicked() }
     }
 
     /**
@@ -61,7 +84,13 @@ class AddTaskActivity : AppCompatActivity() {
      *
      * @param task the taskEntry to populate the UI
      */
-    private fun populateUI(task: TaskEntry) {}
+    private fun populateUI(task: TaskEntry?) {
+        if (task == null) {
+            return
+        }
+        mEditText.text(task.description)
+        setPriorityInViews(task.priority)
+    }
 
     /**
      * onSaveButtonClicked is called when the "save" button is clicked.
@@ -71,16 +100,18 @@ class AddTaskActivity : AppCompatActivity() {
         val description = mEditText!!.text.toString()
         val priority = priorityFromViews
         val date = Date()
-
-        // COMPLETED (4) Make taskEntry final so it is visible inside the run method
-        val taskEntry = TaskEntry(description, priority, date)
-        // COMPLETED (2) Get the diskIO Executor from the instance of AppExecutors and
-        // call the diskIO execute method with a new Runnable and implement its run method
-        AppExecutors.getInstance().diskIO()
-            .execute(Runnable { // COMPLETED (3) Move the remaining logic inside the run method
-                mDb!!.taskDao().insertTask(taskEntry)
-                finish()
-            })
+        val task = TaskEntry(description, priority, date)
+        AppExecutors.getInstance().diskIO().execute(Runnable {
+            if (mTaskId == DEFAULT_TASK_ID) {
+                // insert new task
+                mDb.taskDao().insertTask(task)
+            } else {
+                //update task
+                task.setId(mTaskId)
+                mDb.taskDao().updateTask(task)
+            }
+            finish()
+        })
     }
 
     /**
@@ -89,7 +120,8 @@ class AddTaskActivity : AppCompatActivity() {
     val priorityFromViews: Int
         get() {
             var priority = 1
-            val checkedId = (findViewById(R.id.radioGroup) as RadioGroup).checkedRadioButtonId
+            val checkedId =
+                (findViewById(R.id.radioGroup) as RadioGroup?)!!.checkedRadioButtonId
             when (checkedId) {
                 R.id.radButton1 -> priority = PRIORITY_HIGH
                 R.id.radButton2 -> priority = PRIORITY_MEDIUM
@@ -105,24 +137,28 @@ class AddTaskActivity : AppCompatActivity() {
      */
     fun setPriorityInViews(priority: Int) {
         when (priority) {
-            PRIORITY_HIGH -> (findViewById(R.id.radioGroup) as RadioGroup).check(
+            PRIORITY_HIGH -> (findViewById(R.id.radioGroup) as RadioGroup?)!!.check(
                 R.id.radButton1
             )
-            PRIORITY_MEDIUM -> (findViewById(R.id.radioGroup) as RadioGroup).check(
+            PRIORITY_MEDIUM -> (findViewById(R.id.radioGroup) as RadioGroup?)!!.check(
                 R.id.radButton2
             )
-            PRIORITY_LOW -> (findViewById(R.id.radioGroup) as RadioGroup).check(
+            PRIORITY_LOW -> (findViewById(R.id.radioGroup) as RadioGroup?)!!.check(
                 R.id.radButton3
             )
         }
     }
 
+    private fun findViewById(radioGroup: Int): RadioGroup? {
+
+    }
+
     companion object {
         // Extra for the task ID to be received in the intent
-        const val EXTRA_TASK_ID = "extraTaskId"
+        val EXTRA_TASK_ID: String? = "extraTaskId"
 
         // Extra for the task ID to be received after rotation
-        const val INSTANCE_TASK_ID = "instanceTaskId"
+        val INSTANCE_TASK_ID: String? = "instanceTaskId"
 
         // Constants for priority
         const val PRIORITY_HIGH = 1

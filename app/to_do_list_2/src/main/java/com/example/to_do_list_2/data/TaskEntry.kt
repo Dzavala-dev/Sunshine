@@ -1,19 +1,23 @@
 package com.example.to_do_list_2.data
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import java.util.*
 
-// COMPLETED (2) Annotate the class with Entity. Use "task" for the table name
 
+@Entity(tableName = "task")
 class TaskEntry {
-    // COMPLETED (3) Annotate the id as PrimaryKey. Set autoGenerate to true.
-
+    @PrimaryKey(autoGenerate = true)
     var id = 0
     var description: String
     var priority: Int
+
+    @ColumnInfo(name = "updated_at")
     var updatedAt: Date
 
-    // COMPLETED (4) Use the Ignore annotation so Room knows that it has to use the other constructor instead
-
+    @Ignore
     constructor(description: String, priority: Int, updatedAt: Date) {
         this.description = description
         this.priority = priority

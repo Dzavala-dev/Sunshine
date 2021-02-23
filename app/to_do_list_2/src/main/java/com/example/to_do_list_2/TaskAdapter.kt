@@ -13,31 +13,37 @@ import com.example.to_do_list_2.data.TaskEntry
 import java.text.SimpleDateFormat
 import java.util.*
 
+
 /**
  * This TaskAdapter creates and binds ViewHolders, that hold the description and priority of a task,
  * to a RecyclerView to efficiently display data.
  */
-class TaskAdapter(
+abstract class TaskAdapter
+/**
+ * Constructor for the TaskAdapter that initializes the Context.
+ *
+ * @param context  the current Context
+ * @param listener the ItemClickListener
+ */(
     private val mContext: Context,
-    listener: TaskAdapter.ItemClickListener
+    // Member variable to handle item clicks
+    private val mItemClickListener: ItemClickListener
 ) :
     RecyclerView.Adapter<TaskAdapter.TaskViewHolder?>() {
-    // Member variable to handle item clicks
-    private val mItemClickListener: TaskAdapter.ItemClickListener
 
     // Class variables for the List that holds task data and the Context
     private var mTaskEntries: List<TaskEntry>? = null
 
     // Date formatter
     private val dateFormat =
-        SimpleDateFormat(TaskAdapter.Companion.DATE_FORMAT, Locale.getDefault())
+        SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
 
     /**
      * Called when ViewHolders are created to fill a RecyclerView.
      *
      * @return A new TaskViewHolder that holds the view for each task
      */
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
+    fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): TaskViewHolder {
         // Inflate the task_layout to a view
         val view: View = LayoutInflater.from(mContext)
             .inflate(R.layout.task_layout, parent, false)
@@ -50,12 +56,12 @@ class TaskAdapter(
      * @param holder   The ViewHolder to bind Cursor data to
      * @param position The position of the data in the Cursor
      */
-    override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
+     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         // Determine the values of the wanted data
         val taskEntry: TaskEntry = mTaskEntries!![position]
-        val description: String = taskEntry.getDescription()
-        val priority: Int = taskEntry.getPriority()
-        val updatedAt = dateFormat.format(taskEntry.getUpdatedAt())
+        val description: String = taskEntry.description
+        val priority: Int = taskEntry.priority
+        val updatedAt = dateFormat.format(taskEntry.updatedAt)
 
         //Set values
         holder.taskDescriptionView.text = description
@@ -90,19 +96,27 @@ class TaskAdapter(
     /**
      * Returns the number of items to display.
      */
-    val itemCount: Int
-        get() = if (mTaskEntries == null) {
-            0
-        } else mTaskEntries!!.size
+    /**
+     * Returns the number of items to display.
+     */
+    private val itemCount: Int = if (mTaskEntries == null) {
+        0
+    } else mTaskEntries!!.size
+
+    override fun getItemCount(): Int {
+        TODO("Not yet implemented")
+    }
 
     /**
      * When data changes, this method updates the list of taskEntries
      * and notifies the adapter to use the new values on it
      */
-    fun setTasks(taskEntries: List<TaskEntry>?) {
-        mTaskEntries = taskEntries
-        notifyDataSetChanged()
-    }
+    var tasks: List<Any>?
+        get() = mTaskEntries
+        set(taskEntries) {
+            mTaskEntries = taskEntries as List<TaskEntry>?
+            notifyDataSetChanged()
+        }
 
     interface ItemClickListener {
         fun onItemClickListener(itemId: Int)
@@ -112,11 +126,11 @@ class TaskAdapter(
     inner class TaskViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
         // Class variables for the task description and priority TextViews
-        var taskDescriptionView: TextView
-        var updatedAtView: TextView
-        var priorityView: TextView
+        var taskDescriptionView: TextView = itemView.findViewById(R.id.taskDescription)
+        var updatedAtView: TextView = itemView.findViewById(R.id.taskUpdatedAt)
+        var priorityView: TextView = itemView.findViewById(R.id.priorityTextView)
         override fun onClick(view: View) {
-            val elementId: Int = mTaskEntries!![getAdapterPosition()].getId()
+            val elementId: Int = mTaskEntries!![adapterPosition].id
             mItemClickListener.onItemClickListener(elementId)
         }
 
@@ -126,9 +140,6 @@ class TaskAdapter(
          * @param itemView The view inflated in onCreateViewHolder
          */
         init {
-            taskDescriptionView = itemView.findViewById(R.id.taskDescription)
-            updatedAtView = itemView.findViewById(R.id.taskUpdatedAt)
-            priorityView = itemView.findViewById(R.id.priorityTextView)
             itemView.setOnClickListener(this)
         }
     }
@@ -138,13 +149,4 @@ class TaskAdapter(
         private const val DATE_FORMAT = "dd/MM/yyy"
     }
 
-    /**
-     * Constructor for the TaskAdapter that initializes the Context.
-     *
-     * @param context  the current Context
-     * @param listener the ItemClickListener
-     */
-    init {
-        mItemClickListener = listener
-    }
 }

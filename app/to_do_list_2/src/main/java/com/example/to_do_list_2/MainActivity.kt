@@ -1,17 +1,31 @@
 package com.example.to_do_list_2
 
+
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.graphics.drawable.ClipDrawable.VERTICAL
+import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.android.todolist.R
+import com.example.to_do_list_2.data.AppDatabase
+import com.example.to_do_list_2.data.TaskEntry
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
-class MainActivity : AppCompatActivity(), ItemClickListener {
+class MainActivity : AppCompatActivity(), TaskAdapter.ItemClickListener {
     // Member variables for the adapter and RecyclerView
     private var mRecyclerView: RecyclerView? = null
     private var mAdapter: TaskAdapter? = null
-    private var mDb: AppDatabase? = null
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private val mDb: AppDatabase? = null
+     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -34,18 +48,24 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
          An ItemTouchHelper enables touch behavior (like swipe and move) on each ViewHolder,
          and uses callbacks to signal when a user is performing these actions.
          */ItemTouchHelper(object :
-            SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-            fun onMove(
-                recyclerView: RecyclerView?,
-                viewHolder: RecyclerView.ViewHolder?,
-                target: RecyclerView.ViewHolder?
-            ): Boolean {
-                return false
-            }
+            ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
 
-            // Called when a user swipes left or right on a ViewHolder
-            fun onSwiped(viewHolder: RecyclerView.ViewHolder?, swipeDir: Int) {
+             override fun onMove(
+                 recyclerView: RecyclerView,
+                 viewHolder: RecyclerView.ViewHolder,
+                 target: RecyclerView.ViewHolder
+             ): Boolean {
+                 TODO("Not yet implemented")
+             }
+
+             // Called when a user swipes left or right on a ViewHolder
+           override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int) {
                 // Here is where you'll implement swipe to delete
+                AppExecutors.getInstance().diskIO().execute(Runnable {
+                    val position: Int = viewHolder.adapterPosition
+                    val tasks: List<TaskEntry> = mAdapter.getTasks()
+                    mDb?.taskDao()?.deleteTask(tasks[position])
+                })
             }
         }).attachToRecyclerView(mRecyclerView)
 
@@ -60,30 +80,27 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             startActivity(addTaskIntent)
         })
         mDb = AppDatabase.getInstance(applicationContext)
+        setupViewModel()
     }
 
-    /**
-     * This method is called after this activity has been paused or restarted.
-     * Often, this is after new data has been inserted through an AddTaskActivity,
-     * so this re-queries the database data for any changes.
-     */
-    override fun onResume() {
-        super.onResume()
-        // COMPLETED (5) Get the diskIO Executor from the instance of AppExecutors and
-        // call the diskIO execute method with a new Runnable and implement its run method
-        AppExecutors.getInstance().diskIO()
-            .execute(Runnable { // COMPLETED (6) Move the logic into the run method and
-                // Extract the list of tasks to a final variable
-                val tasks: List<TaskEntry> = mDb.taskDao().loadAllTasks()
-                // COMPLETED (7) Wrap the setTask call in a call to runOnUiThread
-                // We will be able to simplify this once we learn more
-                // about Android Architecture Components
-                runOnUiThread { mAdapter!!.setTasks(tasks) }
-            })
+    private fun setupViewModel() {
+        val viewModel: MainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        viewModel.getTasks()
+            .observe(this,
+                Observer<List<TaskEntry?>?> { taskEntries ->
+                    Log.d(
+                        MainActivity.Companion.TAG,
+                        "Updating list of tasks from LiveData in ViewModel"
+                    )
+                    mAdapter.setTasks(taskEntries)
+                })
     }
 
-    fun onItemClickListener(itemId: Int) {
+    override fun onItemClickListener(itemId: Int) {
         // Launch AddTaskActivity adding the itemId as an extra in the intent
+        val intent = Intent(this@MainActivity, AddTaskActivity::class.java)
+        intent.putExtra(AddTaskActivity.EXTRA_TASK_ID, itemId)
+        startActivity(intent)
     }
 
     companion object {
