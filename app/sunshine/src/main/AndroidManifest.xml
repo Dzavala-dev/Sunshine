@@ -23,13 +23,38 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.sunshine.DetailActivity"
-            android:parentActivityName="com.example.sunshine.MainActivity">
+            android:name=".DetailActivity"
+            android:label="@string/title_activity_detail"
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.sunshine.MainActivity"/>
+                android:value=".MainActivity"/>
         </activity>
-        <activity android:name="com.example.sunshine.SettingsActivity"/>
+
+        <!--The manifest entry for our SettingsActivity. Each Activity requires a manifest entry-->
+        <activity android:name=".SettingsActivity"/>
+
+        <!-- Our ContentProvider -->
+        <provider
+            android:name=".data.WeatherProvider"
+            android:authorities="@string/content_authority"
+            android:exported="false"/>
+
+        <!-- COMPLETED (8) Register SunshineSyncIntentService in the manifest -->
+        <!--This is required for immediate syncs -->
+        <service
+            android:name=".sync.SunshineSyncIntentService"
+            android:exported="false" />
+
+        <service
+            android:name=".sync.SunshineFirebaseJobService"
+            android:exported="false">
+            <!-- COMPLETED (9) Declare an intent filter with the action ACTION_EXECUTE -->
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"/>
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>
