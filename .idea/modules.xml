@@ -2,10 +2,15 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/sunshine/Cursos.Sunshine.app.sunshine.iml" filepath="$PROJECT_DIR$/.idea/modules/app/sunshine/Cursos.Sunshine.app.sunshine.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/visualizerpreferences/Cursos.Sunshine.app.visualizerpreferences.iml" filepath="$PROJECT_DIR$/.idea/modules/app/visualizerpreferences/Cursos.Sunshine.app.visualizerpreferences.iml" />
       <module fileurl="file://$PROJECT_DIR$/Sunshine.iml" filepath="$PROJECT_DIR$/Sunshine.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Sunshine.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Sunshine.app.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/asynctaskloader/Sunshine.app.asynctaskloader.iml" filepath="$PROJECT_DIR$/.idea/modules/app/asynctaskloader/Sunshine.app.asynctaskloader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/hydration-reminder/Sunshine.app.hydration-reminder.iml" filepath="$PROJECT_DIR$/.idea/modules/app/hydration-reminder/Sunshine.app.hydration-reminder.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/loglifecycle/Sunshine.app.loglifecycle.iml" filepath="$PROJECT_DIR$/.idea/modules/app/loglifecycle/Sunshine.app.loglifecycle.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/quizexample/Sunshine.app.quizexample.iml" filepath="$PROJECT_DIR$/.idea/modules/app/quizexample/Sunshine.app.quizexample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/quizexample/droidtermsprovider/Sunshine.app.quizexample.droidtermsprovider.iml" filepath="$PROJECT_DIR$/.idea/modules/app/quizexample/droidtermsprovider/Sunshine.app.quizexample.droidtermsprovider.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/sunshine/Sunshine.app.sunshine.iml" filepath="$PROJECT_DIR$/.idea/modules/app/sunshine/Sunshine.app.sunshine.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/to_do_list_2/Sunshine.app.to_do_list_2.iml" filepath="$PROJECT_DIR$/.idea/modules/app/to_do_list_2/Sunshine.app.to_do_list_2.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/todolist/Sunshine.app.todolist.iml" filepath="$PROJECT_DIR$/.idea/modules/app/todolist/Sunshine.app.todolist.iml" />

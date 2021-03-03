@@ -19,16 +19,28 @@ import com.example.android.sunshine.R
  * MainActivity when the user clicks the up button from the SettingsActivity.
  */
 class SettingsActivity : AppCompatActivity() {
-     override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        this.setContentView(R.layout.activity_settings)
-         this.supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        setContentView(R.layout.activity_settings)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        /*
+         * Normally, calling setDisplayHomeAsUpEnabled(true) (we do so in onCreate here) as well as
+         * declaring the parent activity in the AndroidManifest is all that is required to get the
+         * up button working properly. However, in this case, we want to navigate to the previous
+         * screen the user came from when the up button was clicked, rather than a single
+         * designated Activity in the Manifest.
+         *
+         * We use the up button's ID (android.R.id.home) to listen for when the up button is
+         * clicked and then call onBackPressed to navigate to the previous Activity when this
+         * happens.
+         */
         val id = item.itemId
         if (id == android.R.id.home) {
             onBackPressed()
+            return true
         }
         return super.onOptionsItemSelected(item)
     }

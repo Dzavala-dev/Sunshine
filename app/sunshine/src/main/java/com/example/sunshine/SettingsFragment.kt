@@ -1,9 +1,13 @@
 package com.example.sunshine
 
+import android.app.Activity
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
-import androidx.preference.*
+import androidx.preference.CheckBoxPreference
+import androidx.preference.ListPreference
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
 import com.example.android.sunshine.R
 
 
@@ -20,12 +24,11 @@ class SettingsFragment : PreferenceFragmentCompat(),
     OnSharedPreferenceChangeListener {
     private fun setPreferenceSummary(preference: Preference, value: Any?) {
         val stringValue = value.toString()
-        preference.key
         if (preference is ListPreference) {
-            /* For list preferences, look up the correct display value in */
-            /* the preference's 'entries' list (since they have separate labels/values). */
-            val listPreference: ListPreference = preference
-            val prefIndex: Int = listPreference.findIndexOfValue(stringValue)
+            // For list preferences, look up the correct display value in
+            // the preference's 'entries' list (since they have separate labels/values).
+            val listPreference = preference
+            val prefIndex = listPreference.findIndexOfValue(stringValue)
             if (prefIndex >= 0) {
                 preference.setSummary(listPreference.entries[prefIndex])
             }
@@ -36,13 +39,13 @@ class SettingsFragment : PreferenceFragmentCompat(),
     }
 
     override fun onCreatePreferences(bundle: Bundle?, s: String?) {
-        /* Add 'general' preferences, defined in the XML file */
+        // Add 'general' preferences, defined in the XML file
         addPreferencesFromResource(R.xml.pref_general)
-        val sharedPreferences: SharedPreferences = preferenceScreen.sharedPreferences
-        val prefScreen: PreferenceScreen = preferenceScreen
-        val count: Int = prefScreen.preferenceCount
+        val sharedPreferences = preferenceScreen.sharedPreferences
+        val prefScreen = preferenceScreen
+        val count = prefScreen.preferenceCount
         for (i in 0 until count) {
-            val p: Preference = prefScreen.getPreference(i)
+            val p = prefScreen.getPreference(i)
             if (p !is CheckBoxPreference) {
                 val value = sharedPreferences.getString(p.key, "")
                 setPreferenceSummary(p, value)
@@ -52,13 +55,15 @@ class SettingsFragment : PreferenceFragmentCompat(),
 
     override fun onStop() {
         super.onStop()
-        /* Unregister the preference change listener */preferenceScreen.sharedPreferences
+        // unregister the preference change listener
+        preferenceScreen.sharedPreferences
             .unregisterOnSharedPreferenceChangeListener(this)
     }
 
     override fun onStart() {
         super.onStart()
-        /* Register the preference change listener */preferenceScreen.sharedPreferences
+        // register the preference change listener
+        preferenceScreen.sharedPreferences
             .registerOnSharedPreferenceChangeListener(this)
     }
 
@@ -66,9 +71,23 @@ class SettingsFragment : PreferenceFragmentCompat(),
         sharedPreferences: SharedPreferences,
         key: String
     ) {
-        val preference: Preference = findPreference(key)
-        if (preference !is CheckBoxPreference) {
-            setPreferenceSummary(preference, sharedPreferences.getString(key, ""))
+        val activity: Activity? = activity
+        if (key == getString(R.string.pref_location_key)) {
+            // we've changed the location
+            // Wipe out any potential PlacePicker latlng values so that we can use this text entry.
+            SunshinePreferences.resetLocationCoordinates(activity)
+            //  COMPLETED (14) Sync the weather if the location changes
+            SunshineSyncUtils.startImmediateSync(activity)
+        } else if (key == getString(R.string.pref_units_key)) {
+            // units have changed. update lists of weather entries accordingly
+            activity!!.contentResolver
+                .notifyChange(WeatherContract.WeatherEntry.CONTENT_URI, null)
+        }
+        val preference = findPreference(key)
+        if (null != preference) {
+            if (preference !is CheckBoxPreference) {
+                setPreferenceSummary(preference, sharedPreferences.getString(key, ""))
+            }
         }
     }
 }

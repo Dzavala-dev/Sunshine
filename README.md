@@ -5,6 +5,8 @@ Es un repositorio que contiene las app que se piden en el curso de Java
 
 ## Estructura de proyecto
 
+
+
 - *Sunshine
   - |-> app  
     - |-> asynctaskloader
@@ -14,6 +16,7 @@ Es un repositorio que contiene las app que se piden en el curso de Java
     - |-> to_do_list_2
     - |-> visualizerpreferences
     - |-> webpages-map-sharing
+    - |-> hydration-reminder
 
 
 ## Android API levels
