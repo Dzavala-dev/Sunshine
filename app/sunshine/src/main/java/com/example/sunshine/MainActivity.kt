@@ -102,8 +102,6 @@ class MainActivity : AppCompatActivity(),
             null,
             this
         )
-
-        //      COMPLETED (7) Call SunshineSyncUtils's initialize method instead of startImmediateSync
         SunshineSyncUtils.initialize(this)
     }
 

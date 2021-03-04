@@ -1,3 +1,9 @@
+# v1.2.0
+## creación de app "BoardingPass"
+- Aplicacion que muestra un pase de abordar (diseño de layout. 
+- Agregar el metodo Databinding para la app de Sunshine
+- Modifico el diseño en el layout de Sunshine
+
 # v1.1.0
 ## creación de app "hydration-reminder"
 - Aplicacion que te recuerda hidratarte , mostrando notificaciones. 

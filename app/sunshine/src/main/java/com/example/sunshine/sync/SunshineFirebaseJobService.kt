@@ -1,18 +1,16 @@
 package com.example.sunshine.sync
 
-import android.content.Context
 import android.os.AsyncTask
+import com.firebase.jobdispatcher.Job
+import com.firebase.jobdispatcher.JobParameters
+import com.firebase.jobdispatcher.JobService
+import com.firebase.jobdispatcher.RetryStrategy
 
 
-// COMPLETED (2) Make sure you've imported the jobdispatcher.JobService, not job.JobService
-
-// COMPLETED (2) Make sure you've imported the jobdispatcher.JobService, not job.JobService
-// COMPLETED (3) Add a class called SunshineFirebaseJobService that extends jobdispatcher.JobService
-class SunshineFirebaseJobService : com.firebase.jobdispatcher.JobService() {
-    //  COMPLETED (4) Declare an ASyncTask field called mFetchWeatherTask
+class SunshineFirebaseJobService : JobService() {
     private var mFetchWeatherTask: AsyncTask<Void?, Void?, Void?>? =
         null
-    //  COMPLETED (5) Override onStartJob and within it, spawn off a separate ASyncTask to sync weather data
+
     /**
      * The entry point to your Job. Implementations should offload work to another thread of
      * execution as soon as possible.
@@ -23,24 +21,24 @@ class SunshineFirebaseJobService : com.firebase.jobdispatcher.JobService() {
      *
      * @return whether there is more work remaining.
      */
-    override fun onStartJob(jobParameters: com.firebase.jobdispatcher.JobParameters): Boolean {
+    override fun onStartJob(jobParameters: JobParameters): Boolean {
         mFetchWeatherTask =
             object : AsyncTask<Void?, Void?, Void?>() {
                 protected override fun doInBackground(vararg voids: Void): Void? {
-                    val context: Context = getApplicationContext()
+                    val context = applicationContext
                     SunshineSyncTask.syncWeather(context)
+                    jobFinished(jobParameters, false)
                     return null
                 }
 
                 override fun onPostExecute(aVoid: Void?) {
-                    //  COMPLETED (6) Once the weather data is sync'd, call jobFinished with the appropriate arguements
                     jobFinished(jobParameters, false)
                 }
             }
         mFetchWeatherTask.execute()
         return true
     }
-    //  COMPLETED (7) Override onStopJob, cancel the ASyncTask if it's not null and return true
+
     /**
      * Called when the scheduling engine has decided to interrupt the execution of a running job,
      * most likely because the runtime constraints associated with the job are no longer satisfied.
@@ -49,7 +47,7 @@ class SunshineFirebaseJobService : com.firebase.jobdispatcher.JobService() {
      * @see Job.Builder.setRetryStrategy
      * @see RetryStrategy
      */
-    override fun onStopJob(jobParameters: com.firebase.jobdispatcher.JobParameters): Boolean {
+    override fun onStopJob(jobParameters: JobParameters): Boolean {
         if (mFetchWeatherTask != null) {
             mFetchWeatherTask!!.cancel(true)
         }

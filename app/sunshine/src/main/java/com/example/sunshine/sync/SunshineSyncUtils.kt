@@ -3,11 +3,11 @@ package com.example.sunshine.sync
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import com.firebase.jobdispatcher.*
 import java.util.concurrent.TimeUnit
 
 
 object SunshineSyncUtils {
-    //  COMPLETED (10) Add constant values to sync Sunshine every 3 - 4 hours
     /*
      * Interval at which to sync with the weather. Use TimeUnit for convenience, rather than
      * writing out a bunch of multiplication ourselves and risk making a silly mistake.
@@ -17,21 +17,19 @@ object SunshineSyncUtils {
         TimeUnit.HOURS.toSeconds(SYNC_INTERVAL_HOURS.toLong()).toInt()
     private val SYNC_FLEXTIME_SECONDS = SYNC_INTERVAL_SECONDS / 3
     private var sInitialized = false
-
-    //  COMPLETED (11) Add a sync tag to identify our sync job
     private const val SUNSHINE_SYNC_TAG = "sunshine-sync"
-    //  COMPLETED (12) Create a method to schedule our periodic weather sync
+
     /**
      * Schedules a repeating sync of Sunshine's weather data using FirebaseJobDispatcher.
      * @param context Context used to create the GooglePlayDriver that powers the
      * FirebaseJobDispatcher
      */
     fun scheduleFirebaseJobDispatcherSync(@NonNull context: Context?) {
-        val driver: com.firebase.jobdispatcher.Driver = GooglePlayDriver(context)
+        val driver: Driver = GooglePlayDriver(context)
         val dispatcher = FirebaseJobDispatcher(driver)
 
         /* Create the Job to periodically sync Sunshine */
-        val syncSunshineJob: Job =
+        val syncSunshineJob =
             dispatcher.newJobBuilder() /* The Service that will be used to sync Sunshine's data */
                 .setService(SunshineFirebaseJobService::class.java) /* Set the UNIQUE tag used to identify this Job */
                 .setTag(SUNSHINE_SYNC_TAG) /*
@@ -40,7 +38,7 @@ object SunshineSyncUtils {
                  * device is charging. It might be a good idea to include a preference for this,
                  * as some users may not want to download any data on their mobile plan. ($$$)
                  */
-                .setConstraints(com.firebase.jobdispatcher.Constraint.ON_ANY_NETWORK) /*
+                .setConstraints(Constraint.ON_ANY_NETWORK) /*
                  * setLifetime sets how long this job should persist. The options are to keep the
                  * Job "forever" or to have it die the next time the device boots up.
                  */
@@ -55,7 +53,7 @@ object SunshineSyncUtils {
                  * guaranteed, but is more of a guideline for FirebaseJobDispatcher to go off of.
                  */
                 .setTrigger(
-                    com.firebase.jobdispatcher.Trigger.executionWindow(
+                    Trigger.executionWindow(
                         SYNC_INTERVAL_SECONDS,
                         SYNC_INTERVAL_SECONDS + SYNC_FLEXTIME_SECONDS
                     )
@@ -86,7 +84,6 @@ object SunshineSyncUtils {
         if (sInitialized) return
         sInitialized = true
 
-//      COMPLETED (13) Call the method you created to schedule a periodic weather sync
         /*
          * This method call triggers Sunshine to create its task to synchronize weather data
          * periodically.

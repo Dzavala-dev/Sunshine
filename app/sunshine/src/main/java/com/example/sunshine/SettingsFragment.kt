@@ -42,10 +42,10 @@ class SettingsFragment : PreferenceFragmentCompat(),
         // Add 'general' preferences, defined in the XML file
         addPreferencesFromResource(R.xml.pref_general)
         val sharedPreferences = preferenceScreen.sharedPreferences
-        val prefScreen = preferenceScreen
-        val count = prefScreen.preferenceCount
+        val prefScreen: PreferenceScreen = preferenceScreen
+        val count: Int = prefScreen.getPreferenceCount()
         for (i in 0 until count) {
-            val p = prefScreen.getPreference(i)
+            val p: Preference = prefScreen.getPreference(i)
             if (p !is CheckBoxPreference) {
                 val value = sharedPreferences.getString(p.key, "")
                 setPreferenceSummary(p, value)
@@ -76,7 +76,6 @@ class SettingsFragment : PreferenceFragmentCompat(),
             // we've changed the location
             // Wipe out any potential PlacePicker latlng values so that we can use this text entry.
             SunshinePreferences.resetLocationCoordinates(activity)
-            //  COMPLETED (14) Sync the weather if the location changes
             SunshineSyncUtils.startImmediateSync(activity)
         } else if (key == getString(R.string.pref_units_key)) {
             // units have changed. update lists of weather entries accordingly
