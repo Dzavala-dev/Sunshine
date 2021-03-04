@@ -5,23 +5,18 @@ import android.database.Cursor
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android.sunshine.R
+import com.example.sunshine.utilities.SunshineWeatherUtils
 
 
 /**
  * [ForecastAdapter] exposes a list of weather forecasts
  * from a [android.database.Cursor] to a [android.support.v7.widget.RecyclerView].
  */
-internal class ForecastAdapter
-/**
- * Creates a ForecastAdapter.
- *
- * @param context Used to talk to the UI and app resources
- * @param clickHandler The on-click handler for this adapter. This single handler is called
- * when an item is clicked.
- */(
+internal class ForecastAdapter(
     /* The context we use to utility methods, app resources and layout inflaters */
     @param:NonNull private val mContext: Context,
     /*
@@ -41,6 +36,13 @@ internal class ForecastAdapter
         fun onClick(date: Long)
     }
 
+    /*
+     * Flag to determine if we want to use a separate view for the list item that represents
+     * today. This flag will be true when the phone is in portrait mode and false when the phone
+     * is in landscape. This flag will be set in the constructor of the adapter by accessing
+     * boolean resources.
+     */
+    private val mUseTodayLayout: Boolean
     private var mCursor: Cursor? = null
 
     /**
@@ -58,9 +60,18 @@ internal class ForecastAdapter
         viewGroup: ViewGroup?,
         viewType: Int
     ): ForecastAdapterViewHolder {
-        val view = LayoutInflater
-            .from(mContext)
-            .inflate(R.layout.forecast_list_item, viewGroup, false)
+        val layoutId: Int
+        layoutId = when (viewType) {
+            VIEW_TYPE_TODAY -> {
+                R.layout.list_item_forecast_today
+            }
+            VIEW_TYPE_FUTURE_DAY -> {
+                R.layout.forecast_list_item
+            }
+            else -> throw IllegalArgumentException("Invalid view type, value of $viewType")
+        }
+        val view =
+            LayoutInflater.from(mContext).inflate(layoutId, viewGroup, false)
         view.isFocusable = true
         return ForecastAdapterViewHolder(view)
     }
@@ -80,27 +91,76 @@ internal class ForecastAdapter
         position: Int
     ) {
         mCursor!!.moveToPosition(position)
-        /*******************
-         * Weather Summary *
+        /****************
+         * Weather Icon *
+         */
+        val weatherId = mCursor!!.getInt(MainActivity.INDEX_WEATHER_CONDITION_ID)
+        val weatherImageId: Int
+        val viewType = getItemViewType(position)
+        weatherImageId = when (viewType) {
+            VIEW_TYPE_TODAY -> SunshineWeatherUtils
+                .getLargeArtResourceIdForWeatherCondition(weatherId)
+            VIEW_TYPE_FUTURE_DAY -> SunshineWeatherUtils
+                .getSmallArtResourceIdForWeatherCondition(weatherId)
+            else -> throw IllegalArgumentException("Invalid view type, value of $viewType")
+        }
+        forecastAdapterViewHolder.iconView.setImageResource(weatherImageId)
+        /****************
+         * Weather Date *
          */
         /* Read date from the cursor */  val dateInMillis =
             mCursor!!.getLong(MainActivity.INDEX_WEATHER_DATE)
         /* Get human readable string using our utility method */
         val dateString: String =
             SunshineDateUtils.getFriendlyDateString(mContext, dateInMillis, false)
-        /* Use the weatherId to obtain the proper description */
-        val weatherId = mCursor!!.getInt(MainActivity.INDEX_WEATHER_CONDITION_ID)
-        val description: String =
+
+        /* Display friendly date string */forecastAdapterViewHolder.dateView.text = dateString
+        /***********************
+         * Weather Description *
+         */
+        val description =
             SunshineWeatherUtils.getStringForWeatherCondition(mContext, weatherId)
-        /* Read high temperature from the cursor (in degrees celsius) */
-        val highInCelsius = mCursor!!.getDouble(MainActivity.INDEX_WEATHER_MAX_TEMP)
-        /* Read low temperature from the cursor (in degrees celsius) */
-        val lowInCelsius = mCursor!!.getDouble(MainActivity.INDEX_WEATHER_MIN_TEMP)
-        val highAndLowTemperature: String =
-            SunshineWeatherUtils.formatHighLows(mContext, highInCelsius, lowInCelsius)
-        val weatherSummary =
-            "$dateString - $description - $highAndLowTemperature"
-        forecastAdapterViewHolder.weatherSummary.text = weatherSummary
+        /* Create the accessibility (a11y) String from the weather description */
+        val descriptionA11y = mContext.getString(R.string.a11y_forecast, description)
+
+        /* Set the text and content description (for accessibility purposes) */forecastAdapterViewHolder.descriptionView.text =
+            description
+        forecastAdapterViewHolder.descriptionView.contentDescription = descriptionA11y
+        /**************************
+         * High (max) temperature *
+         */
+        /* Read high temperature from the cursor (in degrees celsius) */  val highInCelsius =
+            mCursor!!.getDouble(MainActivity.INDEX_WEATHER_MAX_TEMP)
+        /*
+          * If the user's preference for weather is fahrenheit, formatTemperature will convert
+          * the temperature. This method will also append either °C or °F to the temperature
+          * String.
+          */
+        val highString =
+            SunshineWeatherUtils.formatTemperature(mContext, highInCelsius)
+        /* Create the accessibility (a11y) String from the weather description */
+        val highA11y = mContext.getString(R.string.a11y_high_temp, highString)
+
+        /* Set the text and content description (for accessibility purposes) */forecastAdapterViewHolder.highTempView.text =
+            highString
+        forecastAdapterViewHolder.highTempView.contentDescription = highA11y
+        /*************************
+         * Low (min) temperature *
+         */
+        /* Read low temperature from the cursor (in degrees celsius) */  val lowInCelsius =
+            mCursor!!.getDouble(MainActivity.INDEX_WEATHER_MIN_TEMP)
+        /*
+          * If the user's preference for weather is fahrenheit, formatTemperature will convert
+          * the temperature. This method will also append either °C or °F to the temperature
+          * String.
+          */
+        val lowString =
+            SunshineWeatherUtils.formatTemperature(mContext, lowInCelsius)
+        val lowA11y = mContext.getString(R.string.a11y_low_temp, lowString)
+
+        /* Set the text and content description (for accessibility purposes) */forecastAdapterViewHolder.lowTempView.text =
+            lowString
+        forecastAdapterViewHolder.lowTempView.contentDescription = lowA11y
     }
 
     /**
@@ -111,6 +171,24 @@ internal class ForecastAdapter
      */
     override fun getItemCount(): Int {
         return if (null == mCursor) 0 else mCursor!!.count
+    }
+
+    /**
+     * Returns an integer code related to the type of View we want the ViewHolder to be at a given
+     * position. This method is useful when we want to use different layouts for different items
+     * depending on their position. In Sunshine, we take advantage of this method to provide a
+     * different layout for the "today" layout. The "today" layout is only shown in portrait mode
+     * with the first item in the list.
+     *
+     * @param position index within our RecyclerView and Cursor
+     * @return the view type (today or future day)
+     */
+    override fun getItemViewType(position: Int): Int {
+        return if (mUseTodayLayout && position == 0) {
+            VIEW_TYPE_TODAY
+        } else {
+            VIEW_TYPE_FUTURE_DAY
+        }
     }
 
     /**
@@ -133,7 +211,11 @@ internal class ForecastAdapter
      */
     internal inner class ForecastAdapterViewHolder(view: View) :
         RecyclerView.ViewHolder(view), View.OnClickListener {
-        val weatherSummary: TextView
+        val iconView: ImageView
+        val dateView: TextView
+        val descriptionView: TextView
+        val highTempView: TextView
+        val lowTempView: TextView
 
         /**
          * This gets called by the child views during a click. We fetch the date that has been
@@ -150,9 +232,30 @@ internal class ForecastAdapter
         }
 
         init {
-            weatherSummary = view.findViewById<View>(R.id.tv_weather_data) as TextView
+            iconView =
+                view.findViewById<View>(R.id.weather_icon) as ImageView
+            dateView = view.findViewById<View>(R.id.date) as TextView
+            descriptionView =
+                view.findViewById<View>(R.id.weather_description) as TextView
+            highTempView = view.findViewById<View>(R.id.high_temperature) as TextView
+            lowTempView = view.findViewById<View>(R.id.low_temperature) as TextView
             view.setOnClickListener(this)
         }
     }
 
+    companion object {
+        private const val VIEW_TYPE_TODAY = 0
+        private const val VIEW_TYPE_FUTURE_DAY = 1
+    }
+
+    /**
+     * Creates a ForecastAdapter.
+     *
+     * @param context      Used to talk to the UI and app resources
+     * @param clickHandler The on-click handler for this adapter. This single handler is called
+     * when an item is clicked.
+     */
+    init {
+        mUseTodayLayout = mContext.resources.getBoolean(R.bool.use_today_layout)
+    }
 }

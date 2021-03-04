@@ -39,7 +39,7 @@ object FakeDataUtils {
      */
     fun insertFakeData(context: Context) {
         //Get today's normalized date
-        val today: Long =
+        val today =
             SunshineDateUtils.normalizeDate(System.currentTimeMillis())
         val fakeValues: MutableList<ContentValues> =
             ArrayList()

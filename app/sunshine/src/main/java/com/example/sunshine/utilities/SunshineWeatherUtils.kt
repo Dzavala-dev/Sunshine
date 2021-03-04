@@ -43,7 +43,7 @@ object SunshineWeatherUtils {
         if (!SunshinePreferences.isMetric(context)) {
             temperature = celsiusToFahrenheit(temperature)
         }
-        val temperatureFormatResourceId: Int = R.string.format_temperature
+        val temperatureFormatResourceId = R.string.format_temperature
 
         /* For presentation, assume the user doesn't care about tenths of a degree. */return String.format(
             context.getString(temperatureFormatResourceId),
@@ -92,7 +92,7 @@ object SunshineWeatherUtils {
         degrees: Float
     ): String {
         var windSpeed = windSpeed
-        var windFormat: Int = R.string.format_wind_kmh
+        var windFormat = R.string.format_wind_kmh
         if (!SunshinePreferences.isMetric(context)) {
             windFormat = R.string.format_wind_mph
             windSpeed = .621371192237334f * windSpeed

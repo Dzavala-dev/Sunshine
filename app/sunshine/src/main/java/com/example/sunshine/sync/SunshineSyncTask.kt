@@ -52,7 +52,6 @@ object SunshineSyncTask {
                     weatherValues
                 )
 
-//              COMPLETED (13) Check if notifications are enabled
                 /*
                  * Finally, after we insert data into the ContentProvider, determine whether or not
                  * we should notify the user that the weather has been refreshed.
@@ -68,8 +67,6 @@ object SunshineSyncTask {
                 val timeSinceLastNotification: Long = SunshinePreferences
                     .getEllapsedTimeSinceLastNotification(context)
                 var oneDayPassedSinceLastNotification = false
-
-//              COMPLETED (14) Check if a day has passed since the last notification
                 if (timeSinceLastNotification >= DateUtils.DAY_IN_MILLIS) {
                     oneDayPassedSinceLastNotification = true
                 }
@@ -77,9 +74,7 @@ object SunshineSyncTask {
                 /*
                  * We only want to show the notification if the user wants them shown and we
                  * haven't shown a notification in the past day.
-                 */
-//              COMPLETED (15) If more than a day have passed and notifications are enabled, notify the user
-                if (notificationsEnabled && oneDayPassedSinceLastNotification) {
+                 */if (notificationsEnabled && oneDayPassedSinceLastNotification) {
                     NotificationUtils.notifyUserOfNewWeather(context)
                 }
 
