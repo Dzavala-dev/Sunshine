@@ -1,10 +1,9 @@
 package com.example.sunshine.sync
 
+import android.annotation.SuppressLint
 import android.os.AsyncTask
-import com.firebase.jobdispatcher.Job
 import com.firebase.jobdispatcher.JobParameters
 import com.firebase.jobdispatcher.JobService
-import com.firebase.jobdispatcher.RetryStrategy
 
 
 class SunshineFirebaseJobService : JobService() {
@@ -23,8 +22,9 @@ class SunshineFirebaseJobService : JobService() {
      */
     override fun onStartJob(jobParameters: JobParameters): Boolean {
         mFetchWeatherTask =
+            @SuppressLint("StaticFieldLeak")
             object : AsyncTask<Void?, Void?, Void?>() {
-                protected override fun doInBackground(vararg voids: Void): Void? {
+                protected override fun doInBackground(vararg p0: Void?): Void? {
                     val context = applicationContext
                     SunshineSyncTask.syncWeather(context)
                     jobFinished(jobParameters, false)
@@ -35,7 +35,7 @@ class SunshineFirebaseJobService : JobService() {
                     jobFinished(jobParameters, false)
                 }
             }
-        mFetchWeatherTask.execute()
+        (mFetchWeatherTask as AsyncTask<Void?, Void?, Void?>).execute()
         return true
     }
 

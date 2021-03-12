@@ -2,6 +2,7 @@ package com.example.sunshine.utilities
 
 import android.content.ContentValues
 import android.content.Context
+import com.example.sunshine.data.WeatherContract
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -15,19 +16,19 @@ object FakeDataUtils {
      */
     private fun createTestWeatherContentValues(date: Long): ContentValues {
         val testWeatherValues = ContentValues()
-        testWeatherValues.put(WeatherEntry.COLUMN_DATE, date)
-        testWeatherValues.put(WeatherEntry.COLUMN_DEGREES, Math.random() * 2)
-        testWeatherValues.put(WeatherEntry.COLUMN_HUMIDITY, Math.random() * 100)
-        testWeatherValues.put(WeatherEntry.COLUMN_PRESSURE, 870 + Math.random() * 100)
+        testWeatherValues.put(WeatherContract.WeatherEntry.COLUMN_DATE, date)
+        testWeatherValues.put(WeatherContract.WeatherEntry.COLUMN_DEGREES, Math.random() * 2)
+        testWeatherValues.put(WeatherContract.WeatherEntry.COLUMN_HUMIDITY, Math.random() * 100)
+        testWeatherValues.put(WeatherContract.WeatherEntry.COLUMN_PRESSURE, 870 + Math.random() * 100)
         val maxTemp = (Math.random() * 100).toInt()
-        testWeatherValues.put(WeatherEntry.COLUMN_MAX_TEMP, maxTemp)
+        testWeatherValues.put(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP, maxTemp)
         testWeatherValues.put(
-            WeatherEntry.COLUMN_MIN_TEMP,
+            WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
             maxTemp - (Math.random() * 10).toInt()
         )
-        testWeatherValues.put(WeatherEntry.COLUMN_WIND_SPEED, Math.random() * 10)
+        testWeatherValues.put(WeatherContract.WeatherEntry.COLUMN_WIND_SPEED, Math.random() * 10)
         testWeatherValues.put(
-            WeatherEntry.COLUMN_WEATHER_ID,
+            WeatherContract.WeatherEntry.COLUMN_WEATHER_ID,
             weatherIDs[(Math.random() * 10).toInt() % 5]
         )
         return testWeatherValues

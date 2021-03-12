@@ -13,48 +13,51 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <!--The manifest entry for our MainActivity. Each Activity requires a manifest entry-->
+        <!-- COMPLETED (5) Use AppTheme.Forecast as the MainActivity's new theme -->
         <activity
             android:name="com.example.sunshine.MainActivity"
             android:label="@string/app_name"
+            android:theme="@style/AppTheme.Forecast"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <!--The manifest entry for our DetailActivity. Each Activity requires a manifest entry-->
         <activity
-            android:name=".DetailActivity"
+            android:name="com.example.sunshine.DetailActivity"
             android:label="@string/title_activity_detail"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName="com.example.sunshine.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value="com.example.sunshine.MainActivity"/>
         </activity>
 
         <!--The manifest entry for our SettingsActivity. Each Activity requires a manifest entry-->
-        <activity android:name=".SettingsActivity"/>
+        <activity android:name="com.example.sunshine.SettingsActivity"/>
 
         <!-- Our ContentProvider -->
         <provider
-            android:name=".data.WeatherProvider"
+            android:name="com.example.sunshine.data.WeatherProvider"
             android:authorities="@string/content_authority"
             android:exported="false"/>
 
-        <!-- COMPLETED (8) Register SunshineSyncIntentService in the manifest -->
         <!--This is required for immediate syncs -->
         <service
-            android:name=".sync.SunshineSyncIntentService"
+            android:name="com.example.sunshine.sync.SunshineSyncIntentService"
             android:exported="false" />
 
+        <!-- This is the Service declaration used in conjunction with FirebaseJobDispatcher -->
         <service
-            android:name=".sync.SunshineFirebaseJobService"
+            android:name="com.example.sunshine.sync.SunshineFirebaseJobService"
             android:exported="false">
-            <!-- COMPLETED (9) Declare an intent filter with the action ACTION_EXECUTE -->
             <intent-filter>
                 <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"/>
             </intent-filter>
         </service>
 
     </application>
-
 </manifest>

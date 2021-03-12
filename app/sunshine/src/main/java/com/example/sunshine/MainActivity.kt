@@ -4,32 +4,25 @@ import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.preference.PreferenceManager
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.LoaderManager.LoaderCallbacks
-import androidx.core.content.AsyncTaskLoader
-import androidx.core.content.Loader
 import androidx.loader.app.LoaderManager
+import androidx.loader.content.CursorLoader
 import androidx.loader.content.Loader
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android.sunshine.R
-import com.example.android.sunshine.data.SunshinePreferences
-import com.example.android.sunshine.utilities.NetworkUtils
-import com.example.android.sunshine.utilities.OpenWeatherJsonUtils
-import data.SunshinePreferences
+import com.example.sunshine.data.SunshinePreferences
+import com.example.sunshine.data.WeatherContract
+import com.example.sunshine.sync.SunshineSyncUtils
 
 
-class MainActivity : AppCompatActivity(),
-    LoaderManager.LoaderCallbacks<Cursor?>, ForecastAdapterOnClickHandler {
+abstract class MainActivity : AppCompatActivity(),
+    LoaderManager.LoaderCallbacks<Cursor?>, ForecastAdapter.ForecastAdapterOnClickHandler {
     private val TAG = MainActivity::class.java.simpleName
     private var mForecastAdapter: ForecastAdapter? = null
     private var mRecyclerView: RecyclerView? = null
@@ -87,7 +80,7 @@ class MainActivity : AppCompatActivity(),
          * Android Context (which all Activities are) as well as an onClickHandler. Since our
          * MainActivity implements the ForecastAdapter ForecastOnClickHandler interface, "this"
          * is also an instance of that type of handler.
-         */mForecastAdapter = ForecastAdapter(this, this)
+         *///mForecastAdapter = ForecastAdapter(this, this)
 
         /* Setting the adapter attaches it to the RecyclerView in our layout. */mRecyclerView!!.adapter =
             mForecastAdapter
@@ -142,7 +135,7 @@ class MainActivity : AppCompatActivity(),
      * @param bundle   Any arguments supplied by the caller
      * @return A new Loader instance that is ready to start loading.
      */
-    override fun onCreateLoader(loaderId: Int, bundle: Bundle?): Loader<Cursor> {
+    override fun onCreateLoader(loaderId: Int, bundle: Bundle?): Loader<Cursor?> {
         return when (loaderId) {
             ID_FORECAST_LOADER -> {
                 /* URI for all rows of weather data in our weather table */
@@ -156,7 +149,7 @@ class MainActivity : AppCompatActivity(),
                      * We created a handy method to do that in our WeatherEntry class.
                      */
                 val selection: String =
-                    WeatherContract.WeatherEntry.getSqlSelectForTodayOnwards()
+                    WeatherContract.WeatherEntry.sqlSelectForTodayOnwards
                 CursorLoader(
                     this,
                     forecastQueryUri,
@@ -197,7 +190,7 @@ class MainActivity : AppCompatActivity(),
      *
      * @param loader The Loader that is being reset.
      */
-    fun onLoaderReset(loader: Loader<Cursor?>?) {
+    override fun onLoaderReset(loader: Loader<Cursor?>) {
         /*
          * Since this Loader's data is now invalid, we need to clear the Adapter that is
          * displaying the data.
@@ -211,7 +204,7 @@ class MainActivity : AppCompatActivity(),
      * @param date Normalized UTC time that represents the local date of the weather in GMT time.
      * @see WeatherContract.WeatherEntry.COLUMN_DATE
      */
-    fun onClick(date: Long) {
+    override fun onClick(date: Long) {
         val weatherDetailIntent = Intent(this@MainActivity, DetailActivity::class.java)
         val uriForDateClicked: Uri =
             WeatherContract.WeatherEntry.buildWeatherUriWithDate(date)

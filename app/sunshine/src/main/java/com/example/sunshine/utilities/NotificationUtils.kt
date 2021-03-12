@@ -2,10 +2,17 @@ package com.example.sunshine.utilities
 
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import com.example.android.sunshine.R
+import com.example.sunshine.DetailActivity
+import com.example.sunshine.data.SunshinePreferences
+import com.example.sunshine.data.WeatherContract
 
 object NotificationUtils {
     /*
@@ -88,7 +95,7 @@ object NotificationUtils {
              * finally the text of the notification, which in our case in a summary of today's
              * forecast.
              */
-            val notificationBuilder: NotificationCompat.Builder = Builder(context)
+            val notificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(context)
                 .setColor(ContextCompat.getColor(context, R.color.colorPrimary))
                 .setSmallIcon(smallArtResourceId)
                 .setLargeIcon(largeIcon)

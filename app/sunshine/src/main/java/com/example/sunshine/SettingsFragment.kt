@@ -4,11 +4,11 @@ import android.app.Activity
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
-import androidx.preference.CheckBoxPreference
-import androidx.preference.ListPreference
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.*
 import com.example.android.sunshine.R
+import com.example.sunshine.data.SunshinePreferences
+import com.example.sunshine.data.WeatherContract
+import com.example.sunshine.sync.SunshineSyncUtils
 
 
 /**
@@ -43,7 +43,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
         addPreferencesFromResource(R.xml.pref_general)
         val sharedPreferences = preferenceScreen.sharedPreferences
         val prefScreen: PreferenceScreen = preferenceScreen
-        val count: Int = prefScreen.getPreferenceCount()
+        val count: Int = prefScreen.preferenceCount
         for (i in 0 until count) {
             val p: Preference = prefScreen.getPreference(i)
             if (p !is CheckBoxPreference) {
@@ -76,7 +76,9 @@ class SettingsFragment : PreferenceFragmentCompat(),
             // we've changed the location
             // Wipe out any potential PlacePicker latlng values so that we can use this text entry.
             SunshinePreferences.resetLocationCoordinates(activity)
-            SunshineSyncUtils.startImmediateSync(activity)
+            if (activity != null) {
+                SunshineSyncUtils.startImmediateSync(activity)
+            }
         } else if (key == getString(R.string.pref_units_key)) {
             // units have changed. update lists of weather entries accordingly
             activity!!.contentResolver

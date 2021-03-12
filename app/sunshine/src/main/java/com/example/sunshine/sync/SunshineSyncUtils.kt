@@ -1,8 +1,11 @@
 package com.example.sunshine.sync
 
+
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.annotation.NonNull
+import com.example.sunshine.data.WeatherContract
 import com.firebase.jobdispatcher.*
 import java.util.concurrent.TimeUnit
 
@@ -106,15 +109,16 @@ object SunshineSyncUtils {
                      * to determine what weather details need to be displayed.
                      */
                 val projectionColumns =
-                    arrayOf<String>(WeatherContract.WeatherEntry._ID)
-                val selectionStatement: String = WeatherContract.WeatherEntry
-                    .getSqlSelectForTodayOnwards()
+                    arrayOf<String>(WeatherContract.WeatherEntry.toString())
+                val selectionStatement: WeatherContract.WeatherEntry = WeatherContract.WeatherEntry
+                    //.getSqlSelectForTodayOnwards()
+
 
                 /* Here, we perform the query to check to see if we have any weather data */
                 val cursor = context.contentResolver.query(
                     forecastQueryUri,
                     projectionColumns,
-                    selectionStatement,
+                    selectionStatement.toString(),
                     null,
                     null
                 )

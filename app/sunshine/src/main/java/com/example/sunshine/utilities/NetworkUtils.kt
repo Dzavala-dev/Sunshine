@@ -3,6 +3,7 @@ package com.example.sunshine.utilities
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.example.sunshine.data.SunshinePreferences
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
@@ -86,9 +87,7 @@ object NetworkUtils {
             val longitude = preferredCoordinates[1]
             buildUrlWithLatitudeLongitude(latitude, longitude)
         } else {
-            val locationQuery: String =
-                SunshinePreferences.getPreferredWeatherLocation(context)
-            buildUrlWithLocationQuery(locationQuery)
+            null
         }
     }
 

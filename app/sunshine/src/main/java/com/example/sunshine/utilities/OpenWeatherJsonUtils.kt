@@ -2,6 +2,8 @@ package com.example.sunshine.utilities
 
 import android.content.ContentValues
 import android.content.Context
+import com.example.sunshine.data.SunshinePreferences
+import com.example.sunshine.data.WeatherContract
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -84,7 +86,7 @@ object OpenWeatherJsonUtils {
          */
 //        long now = System.currentTimeMillis();
 //        long normalizedUtcStartDay = SunshineDateUtils.normalizeDate(now);
-        val normalizedUtcStartDay: Long = SunshineDateUtils.getNormalizedUtcDateForToday()
+        val normalizedUtcStartDay: Long = SunshineDateUtils.normalizedUtcDateForToday
         for (i in 0 until jsonWeatherArray.length()) {
             var dateTimeMillis: Long
             var pressure: Double

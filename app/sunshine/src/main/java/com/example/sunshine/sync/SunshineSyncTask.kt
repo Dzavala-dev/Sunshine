@@ -3,7 +3,13 @@ package com.example.sunshine.sync
 import android.content.ContentValues
 import android.content.Context
 import android.text.format.DateUtils
+import com.example.sunshine.data.SunshinePreferences
+import com.example.sunshine.data.WeatherContract
+import com.example.sunshine.utilities.NetworkUtils
+import com.example.sunshine.utilities.NotificationUtils
+import com.example.sunshine.utilities.OpenWeatherJsonUtils
 import java.net.URL
+
 
 object SunshineSyncTask {
     /**
@@ -22,14 +28,14 @@ object SunshineSyncTask {
              * weather. It will decide whether to create a URL based off of the latitude and
              * longitude or off of a simple location as a String.
              */
-            val weatherRequestUrl: URL = NetworkUtils.getUrl(context)
+            val weatherRequestUrl: URL? = NetworkUtils.getUrl(context)
 
             /* Use the URL to retrieve the JSON */
-            val jsonWeatherResponse: String =
-                NetworkUtils.getResponseFromHttpUrl(weatherRequestUrl)
+            val jsonWeatherResponse: String? =
+                weatherRequestUrl?.let { NetworkUtils.getResponseFromHttpUrl(it) }
 
             /* Parse the JSON into a list of weather values */
-            val weatherValues: Array<ContentValues> = OpenWeatherJsonUtils
+            val weatherValues: Array<ContentValues?>? = OpenWeatherJsonUtils
                 .getWeatherContentValuesFromJson(context, jsonWeatherResponse)
 
             /*

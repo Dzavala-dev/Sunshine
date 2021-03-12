@@ -7,8 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.NonNull
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android.sunshine.R
+import com.example.sunshine.utilities.SunshineDateUtils
 import com.example.sunshine.utilities.SunshineWeatherUtils
 
 
@@ -16,7 +18,7 @@ import com.example.sunshine.utilities.SunshineWeatherUtils
  * [ForecastAdapter] exposes a list of weather forecasts
  * from a [android.database.Cursor] to a [android.support.v7.widget.RecyclerView].
  */
-internal class ForecastAdapter(
+abstract class ForecastAdapter(
     /* The context we use to utility methods, app resources and layout inflaters */
     @param:NonNull private val mContext: Context,
     /*
@@ -209,7 +211,7 @@ internal class ForecastAdapter(
      * a cache of the child views for a forecast item. It's also a convenient place to set an
      * OnClickListener, since it has access to the adapter and the views.
      */
-    internal inner class ForecastAdapterViewHolder(view: View) :
+    inner class ForecastAdapterViewHolder(view: View) :
         RecyclerView.ViewHolder(view), View.OnClickListener {
         val iconView: ImageView
         val dateView: TextView

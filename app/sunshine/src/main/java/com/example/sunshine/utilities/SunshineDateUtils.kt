@@ -2,6 +2,7 @@ package com.example.sunshine.utilities
 
 import android.content.Context
 import android.text.format.DateUtils
+import com.example.android.sunshine.R
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit

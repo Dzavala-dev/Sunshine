@@ -1,7 +1,10 @@
 package com.example.sunshine.data
 
+
 import android.content.Context
 import android.preference.PreferenceManager
+import com.example.android.sunshine.R
+
 
 object SunshinePreferences {
     /*

@@ -33,6 +33,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-preference-v14:1.0.0'
 
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
 
     // Instrumentation dependencies use androidTestImplementation
     // (as opposed to testImplementation for local unit tests run in the JVM)

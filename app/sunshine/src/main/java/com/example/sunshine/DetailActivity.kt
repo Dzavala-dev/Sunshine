@@ -3,16 +3,24 @@ package com.example.sunshine
 import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
+import androidx.databinding.DataBindingUtil
 import androidx.loader.app.LoaderManager
+import androidx.loader.content.CursorLoader
+import androidx.loader.content.Loader
 import com.example.android.sunshine.R
+import com.example.android.sunshine.databinding.ActivityDetailBinding
+import com.example.sunshine.data.WeatherContract
+import com.example.sunshine.utilities.SunshineDateUtils
+import com.example.sunshine.utilities.SunshineWeatherUtils
 
-
-class DetailActivity : AppCompatActivity(),
+abstract class DetailActivity : AppCompatActivity(),
     LoaderManager.LoaderCallbacks<Cursor?> {
     /* A summary of the forecast that can be shared by clicking the share button in the ActionBar */
     private var mForecastSummary: String? = null
@@ -20,7 +28,6 @@ class DetailActivity : AppCompatActivity(),
     /* The URI that is used to access the chosen day's weather details */
     private var mUri: Uri? = null
 
-    //  COMPLETED (2) Remove all the TextView declarations
     /*
      * This field is used for data binding. Normally, we would have to call findViewById many
      * times to get references to the Views in this Activity. With data binding however, we only
@@ -28,15 +35,9 @@ class DetailActivity : AppCompatActivity(),
      * in onCreate of this class. Then, we can access all of the Views in our layout
      * programmatically without cluttering up the code with findViewById.
      */
-    //  COMPLETED (3) Declare an ActivityDetailBinding field called mDetailBinding
     private var mDetailBinding: ActivityDetailBinding? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-//      COMPLETED (4) Remove the call to setContentView
-//      COMPLETED (5) Remove all the findViewById calls
-
-//      COMPLETED (6) Instantiate mDetailBinding using DataBindingUtil
         mDetailBinding = DataBindingUtil.setContentView(this, R.layout.activity_detail)
         mUri = intent.data
         if (mUri == null) throw NullPointerException("URI for DetailActivity cannot be null")
@@ -78,6 +79,7 @@ class DetailActivity : AppCompatActivity(),
      *
      * @return true if you handle the menu click here, false otherwise
      */
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         /* Get the ID of the clicked item */
         val id = item.itemId
@@ -102,6 +104,7 @@ class DetailActivity : AppCompatActivity(),
      *
      * @return the Intent to use to share our weather forecast
      */
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun createShareForecastIntent(): Intent {
         val shareIntent = ShareCompat.IntentBuilder.from(this)
             .setType("text/plain")
@@ -119,19 +122,21 @@ class DetailActivity : AppCompatActivity(),
      *
      * @return A new Loader instance that is ready to start loading.
      */
-    override fun onCreateLoader(loaderId: Int, loaderArgs: Bundle?): Loader<Cursor> {
+    /*override fun onCreateLoader(loaderId: Int, loaderArgs: Bundle?): CursorLoader? {
         return when (loaderId) {
-            ID_DETAIL_LOADER -> CursorLoader(
-                this,
-                mUri,
-                WEATHER_DETAIL_PROJECTION,
-                null,
-                null,
-                null
-            )
+            ID_DETAIL_LOADER -> mUri?.let {
+                CursorLoader(
+                    this,
+                    it,
+                    WEATHER_DETAIL_PROJECTION,
+                    null,
+                    null,
+                    null
+                )
+            }
             else -> throw RuntimeException("Loader Not Implemented: $loaderId")
         }
-    }
+    }*/
 
     /**
      * Runs on the main thread when a load is complete. If initLoader is called (we call it from
@@ -167,8 +172,6 @@ class DetailActivity : AppCompatActivity(),
             /* No data to display, simply return and do nothing */
             return
         }
-
-//      COMPLETED (7) Display the weather icon using mDetailBinding
         /****************
          * Weather Icon *
          */
@@ -178,7 +181,7 @@ class DetailActivity : AppCompatActivity(),
         val weatherImageId: Int =
             SunshineWeatherUtils.getLargeArtResourceIdForWeatherCondition(weatherId)
 
-        /* Set the resource ID on the icon to display the art */mDetailBinding.primaryInfo.weatherIcon.setImageResource(
+        /* Set the resource ID on the icon to display the art */mDetailBinding?.primaryInfo?.weatherIcon?.setImageResource(
             weatherImageId
         )
         /****************
@@ -196,27 +199,22 @@ class DetailActivity : AppCompatActivity(),
             data.getLong(INDEX_WEATHER_DATE)
         val dateText: String =
             SunshineDateUtils.getFriendlyDateString(this, localDateMidnightGmt, true)
-
-//      COMPLETED (8) Use mDetailBinding to display the date
-        mDetailBinding.primaryInfo.date.setText(dateText)
+        mDetailBinding?.primaryInfo?.date?.setText(dateText)
         /***********************
          * Weather Description *
          */
         /* Use the weatherId to obtain the proper description */  val description: String =
             SunshineWeatherUtils.getStringForWeatherCondition(this, weatherId)
 
-//      COMPLETED (15) Create the content description for the description for a11y
         /* Create the accessibility (a11y) String from the weather description */
         val descriptionA11y = getString(R.string.a11y_forecast, description)
 
-//      COMPLETED (9) Use mDetailBinding to display the description and set the content description
-        /* Set the text and content description (for accessibility purposes) */mDetailBinding.primaryInfo.weatherDescription.setText(
+        /* Set the text and content description (for accessibility purposes) */mDetailBinding?.primaryInfo?.weatherDescription?.setText(
             description
         )
-        mDetailBinding.primaryInfo.weatherDescription.setContentDescription(descriptionA11y)
+        mDetailBinding?.primaryInfo?.weatherDescription?.setContentDescription(descriptionA11y)
 
-//      COMPLETED (16) Set the content description of the icon to the same as the weather description a11y text
-        /* Set the content description on the weather image (for accessibility purposes) */mDetailBinding.primaryInfo.weatherIcon.setContentDescription(
+        /* Set the content description on the weather image (for accessibility purposes) */mDetailBinding?.primaryInfo?.weatherIcon?.setContentDescription(
             descriptionA11y
         )
         /**************************
@@ -231,15 +229,13 @@ class DetailActivity : AppCompatActivity(),
          */
         val highString: String = SunshineWeatherUtils.formatTemperature(this, highInCelsius)
 
-//      COMPLETED (17) Create the content description for the high temperature for a11y
         /* Create the accessibility (a11y) String from the weather description */
         val highA11y = getString(R.string.a11y_high_temp, highString)
 
-//      COMPLETED (10) Use mDetailBinding to display the high temperature and set the content description
-        /* Set the text and content description (for accessibility purposes) */mDetailBinding.primaryInfo.highTemperature.setText(
+        /* Set the text and content description (for accessibility purposes) */mDetailBinding?.primaryInfo?.highTemperature?.setText(
             highString
         )
-        mDetailBinding.primaryInfo.highTemperature.setContentDescription(highA11y)
+        mDetailBinding?.primaryInfo?.highTemperature?.setContentDescription(highA11y)
         /*************************
          * Low (min) temperature *
          */
@@ -251,33 +247,25 @@ class DetailActivity : AppCompatActivity(),
          * String.
          */
         val lowString: String = SunshineWeatherUtils.formatTemperature(this, lowInCelsius)
-
-//      COMPLETED (18) Create the content description for the low temperature for a11y
         val lowA11y = getString(R.string.a11y_low_temp, lowString)
 
-//      COMPLETED (11) Use mDetailBinding to display the low temperature and set the content description
-        /* Set the text and content description (for accessibility purposes) */mDetailBinding.primaryInfo.lowTemperature.setText(
+        /* Set the text and content description (for accessibility purposes) */mDetailBinding?.primaryInfo?.lowTemperature?.setText(
             lowString
         )
-        mDetailBinding.primaryInfo.lowTemperature.setContentDescription(lowA11y)
+        mDetailBinding?.primaryInfo?.lowTemperature?.setContentDescription(lowA11y)
         /************
          * Humidity *
          */
         /* Read humidity from the cursor */  val humidity =
             data.getFloat(INDEX_WEATHER_HUMIDITY)
         val humidityString = getString(R.string.format_humidity, humidity)
-
-//      COMPLETED (20) Create the content description for the humidity for a11y
         val humidityA11y = getString(R.string.a11y_humidity, humidityString)
 
-//      COMPLETED (12) Use mDetailBinding to display the humidity and set the content description
-        /* Set the text and content description (for accessibility purposes) */mDetailBinding.extraDetails.humidity.setText(
+        /* Set the text and content description (for accessibility purposes) */mDetailBinding?.extraDetails?.humidity?.setText(
             humidityString
         )
-        mDetailBinding.extraDetails.humidity.setContentDescription(humidityA11y)
-
-//      COMPLETED (19) Set the content description of the humidity label to the humidity a11y String
-        mDetailBinding.extraDetails.humidityLabel.setContentDescription(humidityA11y)
+        mDetailBinding?.extraDetails?.humidity?.setContentDescription(humidityA11y)
+        mDetailBinding?.extraDetails?.humidityLabel?.setContentDescription(humidityA11y)
         /****************************
          * Wind speed and direction *
          */
@@ -287,18 +275,13 @@ class DetailActivity : AppCompatActivity(),
             data.getFloat(INDEX_WEATHER_DEGREES)
         val windString: String =
             SunshineWeatherUtils.getFormattedWind(this, windSpeed, windDirection)
-
-//      COMPLETED (21) Create the content description for the wind for a11y
         val windA11y = getString(R.string.a11y_wind, windString)
 
-//      COMPLETED (13) Use mDetailBinding to display the wind and set the content description
-        /* Set the text and content description (for accessibility purposes) */mDetailBinding.extraDetails.windMeasurement.setText(
+        /* Set the text and content description (for accessibility purposes) */mDetailBinding?.extraDetails?.windMeasurement?.setText(
             windString
         )
-        mDetailBinding.extraDetails.windMeasurement.setContentDescription(windA11y)
-
-//      COMPLETED (22) Set the content description of the wind label to the wind a11y String
-        mDetailBinding.extraDetails.windLabel.setContentDescription(windA11y)
+        mDetailBinding?.extraDetails?.windMeasurement?.setContentDescription(windA11y)
+        mDetailBinding?.extraDetails?.windLabel?.setContentDescription(windA11y)
         /************
          * Pressure *
          */
@@ -313,18 +296,13 @@ class DetailActivity : AppCompatActivity(),
          * pressure.
          */
         val pressureString = getString(R.string.format_pressure, pressure)
-
-//      COMPLETED (23) Create the content description for the pressure for a11y
         val pressureA11y = getString(R.string.a11y_pressure, pressureString)
 
-//      COMPLETED (14) Use mDetailBinding to display the pressure and set the content description
-        /* Set the text and content description (for accessibility purposes) */mDetailBinding.extraDetails.pressure.setText(
+        /* Set the text and content description (for accessibility purposes) */mDetailBinding?.extraDetails?.pressure?.setText(
             pressureString
         )
-        mDetailBinding.extraDetails.pressure.setContentDescription(pressureA11y)
-
-//      COMPLETED (24) Set the content description of the pressure label to the pressure a11y String
-        mDetailBinding.extraDetails.pressureLabel.setContentDescription(pressureA11y)
+        mDetailBinding?.extraDetails?.pressure?.setContentDescription(pressureA11y)
+        mDetailBinding?.extraDetails?.pressureLabel?.setContentDescription(pressureA11y)
 
         /* Store the forecast summary String in our forecast summary field to share later */mForecastSummary =
             String.format(
@@ -340,7 +318,7 @@ class DetailActivity : AppCompatActivity(),
      *
      * @param loader The Loader that is being reset.
      */
-    fun onLoaderReset(loader: Loader<Cursor?>?) {}
+    override fun onLoaderReset(loader: Loader<Cursor?>) {}
 
     companion object {
         /*
