@@ -1,4 +1,4 @@
-com.example.quizexample
+com.udacity.example.quizexample
 anim abc_fade_in
 anim abc_fade_out
 anim abc_grow_fade_in_from_bottom
@@ -1144,6 +1144,7 @@ string abc_shareactionprovider_share_with
 string abc_shareactionprovider_share_with_application
 string abc_toolbar_collapse_description
 string app_name
+string app_name2
 string next_word
 string search_menu_title
 string show_definition

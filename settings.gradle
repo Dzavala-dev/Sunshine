@@ -1,3 +1,4 @@
+include ':app:visual-polish'
 include ':app:boardingpass'
 include ':app:hydration-reminder'
 include ':app:to_do_list_2'

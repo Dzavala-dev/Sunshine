@@ -9,7 +9,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.udacity.example.quizexample.R
 
-
 /**
  * Gets the data from the ContentProvider and shows a series of flash cards.
  */
@@ -40,9 +39,9 @@ class MainActivity : AppCompatActivity() {
 
         // Get the views
         // COMPLETED (1) You'll probably want more than just the Button
-        mWordTextView = findViewById(R.id.text_view_word)
-        mDefinitionTextView = findViewById(R.id.text_view_definition)
-        mButton = findViewById(R.id.button_next)
+        mWordTextView = findViewById(R.id.text_view_word) as TextView
+        mDefinitionTextView = findViewById(R.id.text_view_definition) as TextView
+        mButton = findViewById(R.id.button_next) as Button
 
         //Run the database operation to get the cursor off of the main thread
         WordFetchTask().execute()
@@ -85,7 +84,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showDefinition() {
+    fun showDefinition() {
         // COMPLETED (4) Show the definition
         if (mData != null) {
             // Show the definition TextView
@@ -107,7 +106,7 @@ class MainActivity : AppCompatActivity() {
     inner class WordFetchTask :
         AsyncTask<Void?, Void?, Cursor?>() {
         // Invoked on a background thread
-        override fun doInBackground(vararg p0: Void?): Cursor? {
+        protected override fun doInBackground(vararg p0: Void?): Cursor? {
             // Make the query to get the data
 
             // Get the content resolver

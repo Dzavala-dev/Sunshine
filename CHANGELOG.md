@@ -1,3 +1,7 @@
+# v1.3.0
+## creación de app "Visual-Polish"
+- Aplicacion que muestra la variacion de colores 
+
 # v1.2.0
 ## creación de app "BoardingPass"
 - Aplicacion que muestra un pase de abordar (diseño de layout. 

@@ -18,6 +18,7 @@ Es un repositorio que contiene las app que se piden en el curso de Java
     - |-> webpages-map-sharing
     - |-> hydration-reminder
     - |-> BoardingPass
+    - |-> Visual-Polish
 
 
 ## Android API levels

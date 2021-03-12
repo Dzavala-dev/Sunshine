@@ -13,7 +13,7 @@ object DroidTermsExampleContract : BaseColumns {
     /**
      * This it the content authority for DroidTermsExample provider.
      */
-     val CONTENT_AUTHORITY = "com.example.droidtermsexample"
+    const val CONTENT_AUTHORITY = "com.example.udacity.droidtermsexample"
 
     /**
      * This is the [Uri] on which all other DroidTermsExample Uris are built.
@@ -24,51 +24,51 @@ object DroidTermsExampleContract : BaseColumns {
     /**
      * The path for terms
      */
-     val PATH_TERMS = "terms"
+    const val PATH_TERMS = "terms"
 
     /**
      * This is the [Uri] used to get a full list of terms and definitions.
      */
-    val CONTENT_URI: Uri = BASE_CONTENT_URI.buildUpon()
+    val CONTENT_URI = BASE_CONTENT_URI.buildUpon()
         .appendPath(PATH_TERMS).build()
 
     /**
      * This is a String type that denotes a Uri references a list or directory.
      */
-    val CONTENT_TYPE =
+    const val CONTENT_TYPE =
         ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_TERMS
 
     /**
      * This is a String type that denotes a Uri references a single item.
      */
-    val CONTENT_ITEM_TYPE =
+    const val CONTENT_ITEM_TYPE =
         ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_TERMS
     // Declaring all these as constants makes code a lot more readable.
     // It also looks a more like SQL.
     /**
      * This is the version of the database for [android.database.sqlite.SQLiteOpenHelper].
      */
-     val DATABASE_VERSION = 1
+    const val DATABASE_VERSION = 1
 
     /**
      * This is the name of the SQL table for terms.
      */
-     val TERMS_TABLE = "term_entries"
+    const val TERMS_TABLE = "term_entries"
 
     /**
      * This is the name of the SQL database for terms.
      */
-     val DATABASE_NAME = "terms"
+    const val DATABASE_NAME = "terms"
 
     /**
      * This is the column name in the SQLiteDatabase for the word.
      */
-     val COLUMN_WORD = "word"
+    const val COLUMN_WORD = "word"
 
     /**
      * This is the column name in the SQLiteDatabase for the definition.
      */
-     val COLUMN_DEFINITION = "definition"
+    const val COLUMN_DEFINITION = "definition"
 
     /**
      * This is an array containing all the column headers in the terms table.
@@ -82,17 +82,17 @@ object DroidTermsExampleContract : BaseColumns {
     /**
      * This is the index of the ID in the terms table
      */
-     val COLUMN_INDEX_ID = 0
+    const val COLUMN_INDEX_ID = 0
 
     /**
      * This is the index of the word in the terms table
      */
-     val COLUMN_INDEX_WORD = 1
+    const val COLUMN_INDEX_WORD = 1
 
     /**
      * This is the index of the definition in the terms table
      */
-     val COLUMN_INDEX_DEFINITION = 2
+    const val COLUMN_INDEX_DEFINITION = 2
 
     /**
      * This method creates a [Uri] for a single term, referenced by id.

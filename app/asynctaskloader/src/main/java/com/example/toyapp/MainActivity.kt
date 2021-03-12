@@ -1,10 +1,6 @@
 package com.example.toyapp
 
 import android.os.Bundle
-import androidx.core.app.LoaderManager
-import androidx.core.content.AsyncTaskLoader
-import androidx.core.content.Loader
-import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
@@ -16,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.AsyncTaskLoader
 import androidx.loader.content.Loader
-import com.example.android.asynctaskloader.utilities.NetworkUtils
 import utilities.NetworkUtils
 import java.io.IOException
 import java.net.URL
